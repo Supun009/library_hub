@@ -50,8 +50,41 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'member_deleted') {
     $success = "Member deleted successfully.";
 }
 
-// Fetch Members
+// Fetch Members with Pagination
 $search = $_GET['search'] ?? '';
+$statusFilter = $_GET['status'] ?? 'all'; // 'all', 'active', 'inactive'
+$currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$itemsPerPage = 10;
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+// Count total members for pagination
+$countQuery = "
+    SELECT COUNT(*) as total
+    FROM members m
+    JOIN users u ON m.user_id = u.user_id
+    WHERE m.deleted_at IS NULL
+";
+
+// Apply status filter to count
+if ($statusFilter === 'active') {
+    $countQuery .= " AND m.status = 'active'";
+} elseif ($statusFilter === 'inactive') {
+    $countQuery .= " AND m.status = 'inactive'";
+}
+
+// Apply search filter to count
+if ($search) {
+    $countQuery .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search)";
+}
+
+$countStmt = $pdo->prepare($countQuery);
+if ($search) {
+    $countStmt->bindValue(':search', "%$search%");
+}
+$countStmt->execute();
+$totalItems = $countStmt->fetch()['total'];
+
+// Fetch members with pagination
 $query = "
     SELECT m.member_id, m.full_name, m.email, m.join_date, m.status, u.username,
            (SELECT COUNT(*) FROM issues i WHERE i.member_id = m.member_id AND i.return_date IS NULL) as active_loans
@@ -60,18 +93,27 @@ $query = "
     WHERE m.deleted_at IS NULL
 ";
 
+// Apply status filter
+if ($statusFilter === 'active') {
+    $query .= " AND m.status = 'active'";
+} elseif ($statusFilter === 'inactive') {
+    $query .= " AND m.status = 'inactive'";
+}
+
+// Apply search filter
 if ($search) {
     $query .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search)";
 }
 
-$query .= " ORDER BY m.member_id DESC";
-// ... (rest of execution)
+$query .= " ORDER BY m.member_id DESC LIMIT :limit OFFSET :offset";
 
 $stmt = $pdo->prepare($query);
 
 if ($search) {
     $stmt->bindValue(':search', "%$search%");
 }
+$stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $members = $stmt->fetchAll();
 
@@ -168,17 +210,34 @@ include '../includes/header.php';
     </form>
 </div>
 
-<!-- Search Bar -->
+<!-- Search Bar and Filters -->
 <div class="mb-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
-    <form method="GET" class="relative max-w-full">
-        <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
-        <input
-            type="text"
-            name="search"
-            value="<?php echo htmlspecialchars($search); ?>"
-            placeholder="Search members by name, email, or ID..."
-            class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-        >
+    <form method="GET" class="flex flex-col gap-3 md:flex-row md:items-center">
+        <!-- Search Input -->
+        <div class="relative flex-grow">
+            <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+            <input
+                type="text"
+                name="search"
+                value="<?php echo htmlspecialchars($search); ?>"
+                placeholder="Search members by name, email, or ID..."
+                class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
+        </div>
+        
+        <!-- Status Filter -->
+        <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Status:</label>
+            <select
+                name="status"
+                onchange="this.form.submit()"
+                class="block rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
+                <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All Members</option>
+                <option value="active" <?php echo $statusFilter === 'active' ? 'selected' : ''; ?>>Active Only</option>
+                <option value="inactive" <?php echo $statusFilter === 'inactive' ? 'selected' : ''; ?>>Inactive Only</option>
+            </select>
+        </div>
     </form>
 </div>
 
@@ -186,7 +245,7 @@ include '../includes/header.php';
 <div class="table-container">
     <div class="table-header">
         <h2 class="text-lg font-semibold text-gray-900">Registered Members</h2>
-        <p class="text-gray-500 text-sm mt-1">Total: <?php echo count($members); ?> member(s)</p>
+        <p class="text-gray-500 text-sm mt-1">Total: <?php echo $totalItems; ?> member(s)</p>
     </div>
     <div class="overflow-x-auto">
         <table>
@@ -196,6 +255,7 @@ include '../includes/header.php';
                     <th>Student ID</th>
                     <th>Email</th>
                     <th>Join Date</th>
+                    <th>Status</th>
                     <th>Active Loans</th>
                     <th>Actions</th>
                 </tr>
@@ -208,6 +268,11 @@ include '../includes/header.php';
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['username']); ?></td>
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['email']); ?></td>
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['join_date']); ?></td>
+                            <td>
+                                <span class="badge <?php echo $member['status'] === 'active' ? 'badge-green' : 'badge-red'; ?>">
+                                    <?php echo ucfirst($member['status']); ?>
+                                </span>
+                            </td>
                             <td>
                                 <span class="badge <?php echo $member['active_loans'] > 0 ? 'badge-blue' : 'badge-gray'; ?>">
                                     <?php echo $member['active_loans']; ?>
@@ -224,11 +289,20 @@ include '../includes/header.php';
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="6" class="text-center p-6 text-gray-500">No members found.</td></tr>
+                    <tr><td colspan="7" class="text-center p-6 text-gray-500">No members found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
+
+<?php
+// Include and render pagination
+require_once '../includes/pagination.php';
+renderPagination($currentPage, $totalItems, $itemsPerPage, [
+    'search' => $search,
+    'status' => $statusFilter
+]);
+?>
 
 <?php include '../includes/footer.php'; ?>
