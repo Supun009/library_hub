@@ -1,4 +1,27 @@
 <!-- includes/sidebar.php -->
+<?php
+// Define page groups for active state highlighting
+$currentPage = basename($_SERVER['PHP_SELF']);
+
+// Map nested pages to their parent menu items
+$pageGroups = [
+    'dashboard' => ['dashboard.php'],
+    'books' => ['manage_books.php', 'add_book.php', 'edit_book.php'],
+    'search' => ['search.php'],
+    'members' => ['manage_members.php', 'add_member.php', 'edit_member.php'],
+    'transactions' => ['transactions.php', 'issue_book.php', 'return_book.php'],
+    'profile' => ['profile.php'],
+    // Member pages
+    'browse' => ['index.php'],
+    'member_search' => ['search.php'],
+    'loans' => ['my_loans.php']
+];
+
+// Helper function to check if current page belongs to a group
+function isActiveGroup($group, $currentPage, $pageGroups) {
+    return isset($pageGroups[$group]) && in_array($currentPage, $pageGroups[$group]);
+}
+?>
 <aside class="sidebar">
     <div class="sidebar-header">
         <h1 class="text-xl font-semibold text-indigo-700">LibraryHub</h1>
@@ -6,56 +29,56 @@
     <ul class="sidebar-nav">
         <?php if (hasRole('admin')): ?>
             <li>
-                <a href="/lib_system/library_system/admin/dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/admin/dashboard.php" class="<?php echo isActiveGroup('dashboard', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="layout-dashboard"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li>
-                <a href="/lib_system/library_system/admin/manage_books.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'manage_books.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/admin/manage_books.php" class="<?php echo isActiveGroup('books', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="book-open"></i>
                     <span>Book Catalog</span>
                 </a>
             </li>
             <li>
-                <a href="/lib_system/library_system/admin/search.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'search.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/admin/search.php" class="<?php echo isActiveGroup('search', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="search"></i>
                     <span>Advanced Search</span>
                 </a>
             </li>
             <li>
-                <a href="/lib_system/library_system/admin/manage_members.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'manage_members.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/admin/manage_members.php" class="<?php echo isActiveGroup('members', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="users"></i>
                     <span>Member Management</span>
                 </a>
             </li>
             <li>
-                <a href="/lib_system/library_system/admin/transactions.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'transactions.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/admin/transactions.php" class="<?php echo isActiveGroup('transactions', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="arrow-left-right"></i>
                     <span>Transactions</span>
                 </a>
             </li>
             <li>
-                <a href="/lib_system/library_system/admin/profile.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/admin/profile.php" class="<?php echo isActiveGroup('profile', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="settings"></i>
                     <span>Profile & Settings</span>
                 </a>
             </li>
         <?php elseif (hasRole('member')): ?>
             <li>
-                <a href="/lib_system/library_system/member/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/member/index.php" class="<?php echo isActiveGroup('browse', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="book-open"></i>
                     <span>Browse Catalog</span>
                 </a>
             </li>
             <li>
-                <a href="/lib_system/library_system/member/search.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'search.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/member/search.php" class="<?php echo isActiveGroup('member_search', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="search"></i>
                     <span>Advanced Search</span>
                 </a>
             </li>
             <li>
-                <a href="/lib_system/library_system/member/my_loans.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'my_loans.php' ? 'active' : ''; ?>">
+                <a href="/lib_system/library_system/member/my_loans.php" class="<?php echo isActiveGroup('loans', $currentPage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="history"></i>
                     <span>My Loans</span>
                 </a>

@@ -143,7 +143,7 @@ include '../includes/header.php';
                     : 'cursor-not-allowed bg-gray-100 text-gray-400'; ?>"
                 <?php echo $book['status_name'] === 'Available' ? '' : 'disabled'; ?>
             >
-                <?php echo $book['status_name'] === 'Available' ? 'Issue Book' : 'Not Available'; ?>
+                <?php echo $book['status_name'] === 'Available' ? $book['status_name'] : 'Not Available'; ?>
             </button>
             
         </div>
