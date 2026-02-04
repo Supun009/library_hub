@@ -94,8 +94,8 @@ include '../includes/header.php';
 <!-- Books Grid -->
 <div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
     <?php foreach ($books as $book): ?>
-        <div class="bg-white p-5 rounded shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-            <div class="mb-3">
+        <div class="bg-white p-5 rounded shadow-sm border border-gray-200 hover:shadow-md transition-shadow flex flex-col">
+            <div class="mb-3" style="flex: 1;">
                 <h3 class="font-semibold text-gray-900 mb-1 truncate" title="<?php echo htmlspecialchars($book['title']); ?>">
                     <?php echo htmlspecialchars($book['title']); ?>
                 </h3>
