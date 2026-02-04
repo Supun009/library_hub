@@ -35,6 +35,12 @@
                     <span>Transactions</span>
                 </a>
             </li>
+            <li>
+                <a href="/lib_system/library_system/admin/profile.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : ''; ?>">
+                    <i data-lucide="settings"></i>
+                    <span>Profile & Settings</span>
+                </a>
+            </li>
         <?php elseif (hasRole('member')): ?>
             <li>
                 <a href="/lib_system/library_system/member/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
@@ -55,5 +61,11 @@
                 </a>
             </li>
         <?php endif; ?>
+        <li style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+            <a href="/lib_system/library_system/auth/logout.php" style="color: var(--danger-text);">
+                <i data-lucide="log-out"></i>
+                <span>Logout</span>
+            </a>
+        </li>
     </ul>
 </aside>
