@@ -17,13 +17,15 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'book_added') {
 // Fetch Categories for Filter
 $categories = $pdo->query("SELECT category_id, category_name FROM categories ORDER BY category_name ASC")->fetchAll();
 
-// Fetch Books
+// Fetch Books with Pagination
 $search = $_GET['search'] ?? '';
 $filter = $_GET['category'] ?? '';
+$currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$itemsPerPage = 12; // 12 books per page works well for grid layout
+$offset = ($currentPage - 1) * $itemsPerPage;
 
-$query = "
-    SELECT b.book_id, b.title, b.isbn, c.category_name, s.status_name,
-           GROUP_CONCAT(a.name SEPARATOR ', ') as authors
+// Build base query
+$baseQuery = "
     FROM books b
     LEFT JOIN categories c ON b.category_id = c.category_id
     LEFT JOIN status s ON b.status_id = s.status_id
@@ -45,14 +47,44 @@ if ($filter && $filter !== 'All') {
     $params[] = $filter;
 }
 
+$whereClause = '';
 if (count($conditions) > 0) {
-    $query .= " WHERE " . implode(" AND ", $conditions);
+    $whereClause = " WHERE " . implode(" AND ", $conditions);
 }
 
-$query .= " GROUP BY b.book_id ORDER BY b.book_id DESC";
+// Count total books for pagination
+$countQuery = "SELECT COUNT(DISTINCT b.book_id) as total " . $baseQuery . $whereClause;
+$countStmt = $pdo->prepare($countQuery);
+$countStmt->execute($params);
+$totalItems = $countStmt->fetch()['total'];
+
+// Fetch books with pagination
+$query = "
+    SELECT b.book_id, b.title, b.isbn, c.category_name, s.status_name,
+           GROUP_CONCAT(a.name SEPARATOR ', ') as authors
+    " . $baseQuery . $whereClause . "
+    GROUP BY b.book_id 
+    ORDER BY b.book_id DESC
+    LIMIT :limit OFFSET :offset
+";
 
 $stmt = $pdo->prepare($query);
-$stmt->execute($params);
+
+// Bind search/filter parameters
+$paramIndex = 1;
+if ($search) {
+    $stmt->bindValue($paramIndex++, "%$search%", PDO::PARAM_STR);
+    $stmt->bindValue($paramIndex++, "%$search%", PDO::PARAM_STR);
+}
+if ($filter && $filter !== 'All') {
+    $stmt->bindValue($paramIndex++, $filter, PDO::PARAM_STR);
+}
+
+// Bind pagination parameters
+$stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+$stmt->execute();
 $books = $stmt->fetchAll();
 
 include '../includes/header.php';
@@ -107,7 +139,10 @@ include '../includes/header.php';
 </div>
 
 <!-- Books Grid -->
-
+<div class="mb-4">
+    <h2 class="text-lg font-semibold text-gray-900">Available Books</h2>
+    <p class="text-gray-500 text-sm mt-1">Total: <?php echo $totalItems; ?> book(s)</p>
+</div>
 
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     <?php foreach ($books as $book): ?>
@@ -149,5 +184,14 @@ include '../includes/header.php';
         </div>
     <?php endforeach; ?>
 </div>
+
+<?php
+// Include and render pagination
+require_once '../includes/pagination.php';
+renderPagination($currentPage, $totalItems, $itemsPerPage, [
+    'search' => $search,
+    'category' => $filter
+]);
+?>
 
 <?php include '../includes/footer.php'; ?>
