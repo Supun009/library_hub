@@ -45,20 +45,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+// Check for delete success
+if (isset($_GET['msg']) && $_GET['msg'] === 'member_deleted') {
+    $success = "Member deleted successfully.";
+}
+
 // Fetch Members
 $search = $_GET['search'] ?? '';
 $query = "
-    SELECT m.member_id, m.full_name, m.email, m.join_date, u.username,
+    SELECT m.member_id, m.full_name, m.email, m.join_date, m.status, u.username,
            (SELECT COUNT(*) FROM issues i WHERE i.member_id = m.member_id AND i.return_date IS NULL) as active_loans
     FROM members m
     JOIN users u ON m.user_id = u.user_id
+    WHERE m.deleted_at IS NULL
 ";
 
 if ($search) {
-    $query .= " WHERE m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search";
+    $query .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search)";
 }
 
 $query .= " ORDER BY m.member_id DESC";
+// ... (rest of execution)
+
 $stmt = $pdo->prepare($query);
 
 if ($search) {
@@ -158,9 +166,9 @@ include '../includes/header.php';
                                 </span>
                             </td>
                             <td>
-                                <button class="btn" style="padding: 0.25rem 0.5rem; color: var(--primary-color);">
+                                <a href="edit_member.php?id=<?php echo $member['member_id']; ?>" class="btn" style="padding: 0.25rem 0.5rem; color: var(--primary-color);">
                                     <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
-                                </button>
+                                </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
