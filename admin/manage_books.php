@@ -9,64 +9,13 @@ $pageTitle = 'Book Catalog';
 $error = '';
 $success = '';
 
-// Handle Add Book
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_book') {
-    $title = trim($_POST['title']);
-    $isbn = trim($_POST['isbn']);
-    $authorName = trim($_POST['author']);
-    $categoryName = trim($_POST['category']); // Simplified for demo: text input or select
-
-    if (empty($title) || empty($isbn) || empty($authorName) || empty($categoryName)) {
-        $error = "All fields are required.";
-    } else {
-        try {
-            $pdo->beginTransaction();
-
-            // 1. Get or Create Category
-            $stmt = $pdo->prepare("SELECT category_id FROM categories WHERE category_name = ?");
-            $stmt->execute([$categoryName]);
-            $categoryId = $stmt->fetchColumn();
-            if (!$categoryId) {
-                $stmt = $pdo->prepare("INSERT INTO categories (category_name) VALUES (?)");
-                $stmt->execute([$categoryName]);
-                $categoryId = $pdo->lastInsertId();
-            }
-
-            // 2. Get Status ID (Available)
-            $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Available'");
-            $statusId = $stmt->fetchColumn();
-            if (!$statusId) {
-                // Insert status if not exists (should be handled by schema, but safety net)
-                $pdo->exec("INSERT INTO status (status_name) VALUES ('Available')");
-                $statusId = $pdo->lastInsertId();
-            }
-
-            // 3. Insert Book
-            $stmt = $pdo->prepare("INSERT INTO books (title, isbn, category_id, status_id) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$title, $isbn, $categoryId, $statusId]);
-            $bookId = $pdo->lastInsertId();
-
-            // 4. Get or Create Author & Link
-            $stmt = $pdo->prepare("SELECT author_id FROM authors WHERE name = ?");
-            $stmt->execute([$authorName]);
-            $authorId = $stmt->fetchColumn();
-            if (!$authorId) {
-                $stmt = $pdo->prepare("INSERT INTO authors (name) VALUES (?)");
-                $stmt->execute([$authorName]);
-                $authorId = $pdo->lastInsertId();
-            }
-            
-            $stmt = $pdo->prepare("INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)");
-            $stmt->execute([$bookId, $authorId]);
-
-            $pdo->commit();
-            $success = "Book added successfully.";
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            $error = "Datebase Error: " . $e->getMessage();
-        }
-    }
+// Check for success message from add_book.php
+if (isset($_GET['msg']) && $_GET['msg'] === 'book_added') {
+    $success = "Book added successfully.";
 }
+
+// Fetch Categories for Filter
+$categories = $pdo->query("SELECT category_id, category_name FROM categories ORDER BY category_name ASC")->fetchAll();
 
 // Fetch Books
 $search = $_GET['search'] ?? '';
@@ -106,9 +55,6 @@ $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $books = $stmt->fetchAll();
 
-// Fetch Categories for Filter
-$cats = $pdo->query("SELECT category_name FROM categories")->fetchAll(PDO::FETCH_COLUMN);
-
 include '../includes/header.php';
 ?>
 
@@ -117,48 +63,15 @@ include '../includes/header.php';
         <h1 class="text-2xl text-gray-900 mb-1">Book Catalog</h1>
         <p class="text-gray-600">Browse and manage library books</p>
     </div>
-    <button onclick="document.getElementById('addBookForm').classList.toggle('hidden')" class="btn btn-primary">
+    <a href="add_book.php" class="btn btn-primary">
         <i data-lucide="plus"></i>
         Add New Book
-    </button>
+    </a>
 </div>
 
-<?php if ($error): ?>
-    <div class="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-200"><?php echo htmlspecialchars($error); ?></div>
-<?php endif; ?>
 <?php if ($success): ?>
     <div class="mb-4 p-3 bg-green-100 text-green-700 rounded border border-green-200"><?php echo htmlspecialchars($success); ?></div>
 <?php endif; ?>
-
-<!-- Add Book Form -->
-<div id="addBookForm" class="hidden mb-6 bg-white p-6 rounded shadow-sm border border-gray-200">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Add New Book</h2>
-    <form method="POST">
-        <input type="hidden" name="action" value="add_book">
-        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
-            <div>
-                <label class="block text-sm text-gray-700 mb-1">Book Title</label>
-                <input type="text" name="title" class="form-control" required placeholder="Book Title">
-            </div>
-            <div>
-                <label class="block text-sm text-gray-700 mb-1">ISBN</label>
-                <input type="text" name="isbn" class="form-control" required placeholder="ISBN-13">
-            </div>
-            <div>
-                <label class="block text-sm text-gray-700 mb-1">Author</label>
-                <input type="text" name="author" class="form-control" required placeholder="Author Name">
-            </div>
-            <div>
-                <label class="block text-sm text-gray-700 mb-1">Category</label>
-                <input type="text" name="category" class="form-control" required placeholder="Category (e.g. Science)">
-            </div>
-        </div>
-        <div class="flex gap-2">
-            <button type="submit" class="btn btn-primary">Save Book</button>
-            <button type="button" onclick="document.getElementById('addBookForm').classList.add('hidden')" class="btn" style="background: #e5e7eb; color: #374151;">Cancel</button>
-        </div>
-    </form>
-</div>
 
 <!-- Search & Filter -->
 <div class="mb-6 bg-white p-4 rounded shadow-sm border border-gray-200">
@@ -169,9 +82,9 @@ include '../includes/header.php';
         </div>
         <select name="category" class="form-control" style="width: 200px;" onchange="this.form.submit()">
             <option value="All">All Categories</option>
-            <?php foreach ($cats as $cat): ?>
-                <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo $filter === $cat ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($cat); ?>
+            <?php foreach ($categories as $cat): ?>
+                <option value="<?php echo htmlspecialchars($cat['category_name']); ?>" <?php echo $filter === $cat['category_name'] ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($cat['category_name']); ?>
                 </option>
             <?php endforeach; ?>
         </select>

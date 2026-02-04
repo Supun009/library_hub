@@ -550,3 +550,4 @@ body.auth-body {
     .md\:flex-row { flex-direction: row; }
 }
 
+.hidden { display: none !important; }
