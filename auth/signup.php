@@ -70,47 +70,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Library System</title>
+
+    <!-- Tailwind CSS (step 1: add alongside existing styles, do not remove old CSS yet) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Existing custom stylesheet (kept for now to avoid breaking layout) -->
     <link rel="stylesheet" href="/lib_system/library_system/assets/css/style.css">
 </head>
 <body class="auth-body">
     <div class="auth-container">
-        <div class="auth-header">
-            <h1>Create Account</h1>
-            <p class="text-light">Get started with your library account</p>
+        <div class="mb-6 text-center">
+            <h1 class="text-2xl font-semibold text-gray-900">Create Account</h1>
+            <p class="mt-1 text-sm text-gray-500">Get started with your library account</p>
         </div>
-        
+
         <?php if ($error): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+            <div class="mb-4 rounded-md border border-red-200 bg-red-100 px-4 py-3 text-sm text-red-700">
+                <?php echo htmlspecialchars($error); ?>
+            </div>
         <?php endif; ?>
 
-        <form action="" method="POST">
-            <div class="form-group">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" id="username" name="username" class="form-control" required>
+        <form action="" method="POST" class="space-y-4">
+            <div>
+                <label for="username" class="mb-1 block text-sm font-medium text-gray-700">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
-            
-            <div class="form-group">
-                <label for="role" class="form-label">Role</label>
-                <select name="role" id="role" class="form-control">
+
+            <div>
+                <label for="role" class="mb-1 block text-sm font-medium text-gray-700">Role</label>
+                <select
+                    name="role"
+                    id="role"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
                     <option value="member">Member</option>
                     <option value="admin">Admin (Demo)</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" id="password" name="password" class="form-control" required>
+            <div>
+                <label for="password" class="mb-1 block text-sm font-medium text-gray-700">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
 
-            <div class="form-group">
-                <label for="confirm_password" class="form-label">Confirm Password</label>
-                <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+            <div>
+                <label for="confirm_password" class="mb-1 block text-sm font-medium text-gray-700">Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    required
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             
-            <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+            <button
+                type="submit"
+                class="mt-2 inline-flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+                Sign Up
+            </button>
             
-            <div class="text-center mt-4">
-                <span class="text-sm">Already have an account? <a href="login.php" class="text-indigo">Sign in</a></span>
+            <div class="mt-4 text-center text-sm text-gray-600">
+                Already have an account?
+                <a href="login.php" class="font-medium text-indigo-600 hover:text-indigo-700">Sign in</a>
             </div>
         </form>
     </div>

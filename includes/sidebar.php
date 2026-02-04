@@ -1,7 +1,7 @@
 <!-- includes/sidebar.php -->
 <aside class="sidebar">
     <div class="sidebar-header">
-        <h1>LibraryHub</h1>
+        <h1 class="text-xl font-semibold text-indigo-700">LibraryHub</h1>
     </div>
     <ul class="sidebar-nav">
         <?php if (hasRole('admin')): ?>
@@ -61,9 +61,12 @@
                 </a>
             </li>
         <?php endif; ?>
-        <li style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
-            <a href="/lib_system/library_system/auth/logout.php" style="color: var(--danger-text);">
-                <i data-lucide="log-out"></i>
+        <li class="mt-auto border-t border-gray-200 pt-4">
+            <a
+                href="/lib_system/library_system/auth/logout.php"
+                class="flex items-center gap-3 rounded px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+                <i data-lucide="log-out" class="h-4 w-4"></i>
                 <span>Logout</span>
             </a>
         </li>

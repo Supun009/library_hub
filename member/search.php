@@ -89,30 +89,45 @@ include '../includes/header.php';
 ?>
 
 <div class="mb-6">
-    <h1 class="text-2xl text-gray-900 mb-1">Advanced Search</h1>
-    <p class="text-gray-600">Search for books using multiple filters</p>
+    <h1 class="mb-1 text-2xl font-semibold text-gray-900">Advanced Search</h1>
+    <p class="text-sm text-gray-600">Search for books using multiple filters</p>
 </div>
 
 <!-- Search Form -->
-<div class="bg-white p-6 rounded shadow-sm border border-gray-200 mb-6">
+<div class="mb-6 rounded border border-gray-200 bg-white p-6 shadow-sm">
     <form method="GET">
-        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
             <!-- Book Title -->
             <div>
-                <label class="block text-sm text-gray-700 mb-2">Book Title</label>
-                <input type="text" name="title" value="<?php echo htmlspecialchars($filters['title']); ?>" class="form-control" placeholder="Enter book title">
+                <label class="mb-2 block text-sm font-medium text-gray-700">Book Title</label>
+                <input
+                    type="text"
+                    name="title"
+                    value="<?php echo htmlspecialchars($filters['title']); ?>"
+                    placeholder="Enter book title"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
 
             <!-- Author Name -->
             <div>
-                <label class="block text-sm text-gray-700 mb-2">Author Name</label>
-                <input type="text" name="author" value="<?php echo htmlspecialchars($filters['author']); ?>" class="form-control" placeholder="Enter author name">
+                <label class="mb-2 block text-sm font-medium text-gray-700">Author Name</label>
+                <input
+                    type="text"
+                    name="author"
+                    value="<?php echo htmlspecialchars($filters['author']); ?>"
+                    placeholder="Enter author name"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
 
             <!-- Category -->
             <div>
-                <label class="block text-sm text-gray-700 mb-2">Category</label>
-                <select name="category" class="form-control">
+                <label class="mb-2 block text-sm font-medium text-gray-700">Category</label>
+                <select
+                    name="category"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
                     <option value="All">All Categories</option>
                     <?php foreach ($categories as $cat): ?>
                         <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo $filters['category'] === $cat ? 'selected' : ''; ?>>
@@ -124,49 +139,88 @@ include '../includes/header.php';
 
             <!-- ISBN -->
             <div>
-                <label class="block text-sm text-gray-700 mb-2">ISBN</label>
-                <input type="text" name="isbn" value="<?php echo htmlspecialchars($filters['isbn']); ?>" class="form-control" placeholder="Enter ISBN">
+                <label class="mb-2 block text-sm font-medium text-gray-700">ISBN</label>
+                <input
+                    type="text"
+                    name="isbn"
+                    value="<?php echo htmlspecialchars($filters['isbn']); ?>"
+                    placeholder="Enter ISBN"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
 
             <!-- Publication Year From -->
             <div>
-                <label class="block text-sm text-gray-700 mb-2">Publication Year (From)</label>
-                <input type="number" name="year_from" value="<?php echo htmlspecialchars($filters['year_from']); ?>" class="form-control" placeholder="e.g., 2000">
+                <label class="mb-2 block text-sm font-medium text-gray-700">Publication Year (From)</label>
+                <input
+                    type="number"
+                    name="year_from"
+                    value="<?php echo htmlspecialchars($filters['year_from']); ?>"
+                    placeholder="e.g., 2000"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
 
             <!-- Publication Year To -->
             <div>
-                <label class="block text-sm text-gray-700 mb-2">Publication Year (To)</label>
-                <input type="number" name="year_to" value="<?php echo htmlspecialchars($filters['year_to']); ?>" class="form-control" placeholder="e.g., 2024">
+                <label class="mb-2 block text-sm font-medium text-gray-700">Publication Year (To)</label>
+                <input
+                    type="number"
+                    name="year_to"
+                    value="<?php echo htmlspecialchars($filters['year_to']); ?>"
+                    placeholder="e.g., 2024"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
 
             <!-- Availability Status -->
-            <div class="col-span-2">
-                <label class="block text-sm text-gray-700 mb-2">Availability Status</label>
-                <div class="flex gap-4">
-                    <label class="flex items-center gap-2">
-                        <input type="radio" name="status" value="all" <?php echo $filters['status'] === 'all' ? 'checked' : ''; ?>>
-                        <span class="text-sm text-gray-700">All Books</span>
+            <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-gray-700">Availability Status</label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center gap-2 text-sm text-gray-700">
+                        <input
+                            type="radio"
+                            name="status"
+                            value="all"
+                            <?php echo $filters['status'] === 'all' ? 'checked' : ''; ?>
+                        >
+                        <span>All Books</span>
                     </label>
-                    <label class="flex items-center gap-2">
-                        <input type="radio" name="status" value="available" <?php echo $filters['status'] === 'available' ? 'checked' : ''; ?>>
-                        <span class="text-sm text-gray-700">Available Only</span>
+                    <label class="flex items-center gap-2 text-sm text-gray-700">
+                        <input
+                            type="radio"
+                            name="status"
+                            value="available"
+                            <?php echo $filters['status'] === 'available' ? 'checked' : ''; ?>
+                        >
+                        <span>Available Only</span>
                     </label>
-                    <label class="flex items-center gap-2">
-                        <input type="radio" name="status" value="issued" <?php echo $filters['status'] === 'issued' ? 'checked' : ''; ?>>
-                        <span class="text-sm text-gray-700">Issued Only</span>
+                    <label class="flex items-center gap-2 text-sm text-gray-700">
+                        <input
+                            type="radio"
+                            name="status"
+                            value="issued"
+                            <?php echo $filters['status'] === 'issued' ? 'checked' : ''; ?>
+                        >
+                        <span>Issued Only</span>
                     </label>
                 </div>
             </div>
         </div>
 
         <div class="flex gap-3">
-            <button type="submit" class="btn btn-primary">
-                <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+            <button
+                type="submit"
+                class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+                <i data-lucide="search" class="h-4 w-4"></i>
                 Search Books
             </button>
-            <a href="search.php" class="btn" style="background-color: #e5e7eb; color: #374151;">
-                <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+            <a
+                href="search.php"
+                class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+            >
+                <i data-lucide="x" class="h-4 w-4"></i>
                 Reset Filters
             </a>
         </div>

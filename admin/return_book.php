@@ -109,8 +109,12 @@ include '../includes/header.php';
         <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">1. Find Active Loans</h2>
             <div class="mb-4">
-                <label class="block text-sm text-gray-700 mb-1">Select Member with Active Loans</label>
-                <select id="memberSelect" class="form-control" onchange="window.location.href='?member_id='+this.value">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Select Member with Active Loans</label>
+                <select
+                    id="memberSelect"
+                    onchange="window.location.href='?member_id='+this.value"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
                     <option value="">-- Select Member --</option>
                     <?php foreach ($membersWithLoans as $m): ?>
                         <option value="<?php echo $m['member_id']; ?>" <?php echo $selectedMemberId == $m['member_id'] ? 'selected' : ''; ?>>
@@ -131,9 +135,9 @@ include '../includes/header.php';
                             $isOverdue = $loan['days_overdue'] > 0;
                             $estFine = $isOverdue ? $loan['days_overdue'] * 0.50 : 0;
                         ?>
-                        <div class="p-3 border rounded hover:bg-gray-50 cursor-pointer" 
+                        <div class="cursor-pointer rounded border p-3 hover:bg-gray-50" 
                              onclick="selectLoan(<?php echo $loan['issue_id']; ?>, <?php echo $estFine; ?>)">
-                            <div class="flex justify-between items-start mb-1">
+                            <div class="mb-1 flex items-start justify-between">
                                 <span class="font-medium text-gray-900"><?php echo htmlspecialchars($loan['title']); ?></span>
                                 <?php if ($isOverdue): ?>
                                     <span class="badg badge-red text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded">Overdue</span>
@@ -141,12 +145,15 @@ include '../includes/header.php';
                                     <span class="badge badge-green text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">On Time</span>
                                 <?php endif; ?>
                             </div>
-                            <div class="text-sm text-gray-500 mb-2">
+                            <div class="mb-2 text-sm text-gray-500">
                                 Due: <?php echo $loan['due_date']; ?> (ISBN: <?php echo $loan['isbn']; ?>)
                             </div>
-                             <div class="flex justify-between items-center text-xs">
+                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-gray-400">ID: #<?php echo $loan['issue_id']; ?></span>
-                                <button type="button" class="btn btn-sm text-primary border border-primary px-2 py-1 rounded">
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center rounded-md border border-indigo-200 bg-white px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                >
                                     Select
                                 </button>
                             </div>
@@ -164,30 +171,47 @@ include '../includes/header.php';
     <!-- Right Column: Return Form -->
     <div>
         <div class="bg-white p-6 rounded shadow-sm border border-gray-200 sticky top-4">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">3. Process Return</h2>
+            <h2 class="mb-4 text-lg font-semibold text-gray-900">3. Process Return</h2>
             <form method="POST">
                 <input type="hidden" name="action" value="return_book">
                 
                 <div class="mb-4">
-                    <label class="block text-sm text-gray-700 mb-1">Transaction ID *</label>
-                    <input type="text" name="issue_id" id="issueIdsInput" class="form-control" 
-                           placeholder="Enter ID or Select from list" 
-                           required 
-                           value="<?php echo htmlspecialchars($prefillId); ?>" 
-                           <?php echo $prefillId ? 'readonly' : ''; ?>>
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Transaction ID *</label>
+                    <input
+                        type="text"
+                        name="issue_id"
+                        id="issueIdsInput"
+                        placeholder="Enter ID or Select from list"
+                        required
+                        value="<?php echo htmlspecialchars($prefillId); ?>"
+                        <?php echo $prefillId ? 'readonly' : ''; ?>
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm text-gray-700 mb-1">Fine Amount ($)</label>
-                    <input type="number" step="0.50" name="fine_amount" id="fineInput" class="form-control" value="<?php echo $prefillFine; ?>">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Fine Amount ($)</label>
+                    <input
+                        type="number"
+                        step="0.50"
+                        name="fine_amount"
+                        id="fineInput"
+                        value="<?php echo $prefillFine; ?>"
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
                 </div>
                 
-                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded mb-4">
-                    <h3 class="text-sm font-semibold text-yellow-900 mb-1">Fine Policy</h3>
+                <div class="mb-4 rounded border border-yellow-200 bg-yellow-50 p-4">
+                    <h3 class="mb-1 text-sm font-semibold text-yellow-900">Fine Policy</h3>
                     <p class="text-sm text-yellow-800">$0.50 per day overdue.</p>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full">Confirm Return</button>
+                <button
+                    type="submit"
+                    class="inline-flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+                >
+                    Confirm Return
+                </button>
             </form>
         </div>
     </div>

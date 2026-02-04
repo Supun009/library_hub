@@ -58,29 +58,44 @@ $books = $stmt->fetchAll();
 include '../includes/header.php';
 ?>
 
-<div class="mb-6 flex justify-between items-center">
+<div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-2xl text-gray-900 mb-1">Book Catalog</h1>
-        <p class="text-gray-600">Browse and manage library books</p>
+        <h1 class="mb-1 text-2xl font-semibold text-gray-900">Book Catalog</h1>
+        <p class="text-sm text-gray-600">Browse and manage library books</p>
     </div>
-    <a href="add_book.php" class="btn btn-primary">
-        <i data-lucide="plus"></i>
+    <a
+        href="add_book.php"
+        class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+    >
+        <i data-lucide="plus" class="h-4 w-4"></i>
         Add New Book
     </a>
 </div>
 
 <?php if ($success): ?>
-    <div class="mb-4 p-3 bg-green-100 text-green-700 rounded border border-green-200"><?php echo htmlspecialchars($success); ?></div>
+    <div class="mb-4 rounded-md border border-green-200 bg-green-100 px-4 py-3 text-sm text-green-700">
+        <?php echo htmlspecialchars($success); ?>
+    </div>
 <?php endif; ?>
 
 <!-- Search & Filter -->
-<div class="mb-6 bg-white p-4 rounded shadow-sm border border-gray-200">
-    <form method="GET" class="flex gap-4 items-center">
-        <div class="header-search" style="margin: 0; flex: 1; max-width: none;">
-            <i data-lucide="search"></i>
-            <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by title or ISBN...">
+<div class="mb-6 rounded-md border border-gray-200 bg-white p-4 shadow-sm">
+    <form method="GET" class="flex flex-wrap items-center gap-4">
+        <div class="relative flex-1 min-w-[220px]">
+            <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+            <input
+                type="text"
+                name="search"
+                value="<?php echo htmlspecialchars($search); ?>"
+                placeholder="Search by title or ISBN..."
+                class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
         </div>
-        <select name="category" class="form-control" style="width: 200px;" onchange="this.form.submit()">
+        <select
+            name="category"
+            onchange="this.form.submit()"
+            class="block w-full max-w-xs rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        >
             <option value="All">All Categories</option>
             <?php foreach ($categories as $cat): ?>
                 <option value="<?php echo htmlspecialchars($cat['category_name']); ?>" <?php echo $filter === $cat['category_name'] ? 'selected' : ''; ?>>
@@ -94,30 +109,40 @@ include '../includes/header.php';
 <!-- Books Grid -->
 
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     <?php foreach ($books as $book): ?>
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full hover:shadow-md transition-shadow">
+        <div class="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
             
             <div class="flex-grow">
-                <h3 class="font-bold text-gray-900 text-lg mb-1 truncate" title="<?php echo htmlspecialchars($book['title']); ?>">
+                <h3
+                    class="mb-1 truncate text-lg font-bold text-gray-900"
+                    title="<?php echo htmlspecialchars($book['title']); ?>"
+                >
                     <?php echo htmlspecialchars($book['title']); ?>
                 </h3>
-                <p class="text-sm text-gray-600 mb-2 italic"><?php echo htmlspecialchars($book['authors']); ?></p>
-                <p class="text-xs font-mono text-gray-400">ISBN: <?php echo htmlspecialchars($book['isbn']); ?></p>
+                <p class="mb-2 text-sm italic text-gray-600">
+                    <?php echo htmlspecialchars($book['authors']); ?>
+                </p>
+                <p class="text-xs font-mono text-gray-400">
+                    ISBN: <?php echo htmlspecialchars($book['isbn']); ?>
+                </p>
             </div>
             
-            <div class="flex items-center justify-between mt-6 mb-4">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <div class="mt-6 mb-4 flex items-center justify-between">
+                <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                     <?php echo htmlspecialchars($book['category_name']); ?>
                 </span>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $book['status_name'] === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
+                <span class="rounded-full px-2.5 py-0.5 text-xs font-medium <?php echo $book['status_name'] === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
                     <?php echo htmlspecialchars($book['status_name']); ?>
                 </span>
             </div>
             
-            <button class="btn w-full <?php echo $book['status_name'] === 'Available' ? 'btn-primary' : ''; ?>" 
-                    style="justify-content: center; background-color: <?php echo $book['status_name'] === 'Available' ? '' : '#e5e7eb; color: #9ca3af; cursor: not-allowed;'; ?>"
-                    <?php echo $book['status_name'] === 'Available' ? '' : 'disabled'; ?>>
+            <button
+                class="inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors <?php echo $book['status_name'] === 'Available'
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    : 'cursor-not-allowed bg-gray-100 text-gray-400'; ?>"
+                <?php echo $book['status_name'] === 'Available' ? '' : 'disabled'; ?>
+            >
                 <?php echo $book['status_name'] === 'Available' ? 'Issue Book' : 'Not Available'; ?>
             </button>
             

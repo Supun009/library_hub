@@ -108,48 +108,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 include '../includes/header.php';
 ?>
 
-<div class="mb-6 flex justify-between items-center">
+<div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-2xl text-gray-900 mb-1">Add New Book</h1>
-        <p class="text-gray-600">Enter details to add a new book to the catalog.</p>
+        <h1 class="text-2xl font-semibold text-gray-900 mb-1">Add New Book</h1>
+        <p class="text-sm text-gray-600">Enter details to add a new book to the catalog.</p>
     </div>
-    <a href="manage_books.php" class="btn" style="background: #e5e7eb; color: #374151;">
-        <i data-lucide="arrow-left"></i>
+    <a
+        href="manage_books.php"
+        class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+    >
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
         Back to Catalog
     </a>
 </div>
 
 <?php if ($error): ?>
-    <div class="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-200"><?php echo htmlspecialchars($error); ?></div>
+    <div class="mb-4 rounded-md border border-red-200 bg-red-100 px-4 py-3 text-sm text-red-700">
+        <?php echo htmlspecialchars($error); ?>
+    </div>
 <?php endif; ?>
 
-<div class="bg-white p-6 rounded shadow-sm border border-gray-200">
+<div class="rounded-md border border-gray-200 bg-white p-6 shadow-sm">
     <form method="POST" id="addBookForm">
         <input type="hidden" name="action" value="add_book">
         
-        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mb-4">
             <!-- Title -->
-            <div style="grid-column: span 2;">
-                <label class="block text-sm text-gray-700 mb-1">Book Title *</label>
-                <input type="text" name="title" class="form-control" required placeholder="e.g. The Pragmatic Programmer" value="<?php echo htmlspecialchars($_POST['title'] ?? ''); ?>">
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Book Title *</label>
+                <input
+                    type="text"
+                    name="title"
+                    required
+                    placeholder="e.g. The Pragmatic Programmer"
+                    value="<?php echo htmlspecialchars($_POST['title'] ?? ''); ?>"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             
             <!-- ISBN -->
             <div>
-                <label class="block text-sm text-gray-700 mb-1">ISBN *</label>
-                <input type="text" name="isbn" class="form-control" required placeholder="ISBN-13" value="<?php echo htmlspecialchars($_POST['isbn'] ?? ''); ?>">
+                <label class="mb-1 block text-sm font-medium text-gray-700">ISBN *</label>
+                <input
+                    type="text"
+                    name="isbn"
+                    required
+                    placeholder="ISBN-13"
+                    value="<?php echo htmlspecialchars($_POST['isbn'] ?? ''); ?>"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
 
             <!-- Publication Year -->
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Publication Year</label>
-                <input type="number" name="publication_year" class="form-control" placeholder="e.g. 2023" min="1000" max="<?php echo date('Y') + 1; ?>" value="<?php echo htmlspecialchars($_POST['publication_year'] ?? ''); ?>">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Publication Year</label>
+                <input
+                    type="number"
+                    name="publication_year"
+                    placeholder="e.g. 2023"
+                    min="1000"
+                    max="<?php echo date('Y') + 1; ?>"
+                    value="<?php echo htmlspecialchars($_POST['publication_year'] ?? ''); ?>"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             
             <!-- Category -->
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Category *</label>
-                <select name="category_id" class="form-control" required>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Category *</label>
+                <select
+                    name="category_id"
+                    required
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
                     <option value="">Select Category</option>
                     <?php foreach ($categories as $cat): ?>
                         <option value="<?php echo $cat['category_id']; ?>"><?php echo htmlspecialchars($cat['category_name']); ?></option>
@@ -160,21 +191,36 @@ include '../includes/header.php';
 
         <!-- Authors Section -->
         <div class="mb-6">
-            <div class="flex justify-between items-center mb-2">
-                <label class="block text-sm text-gray-700">Authors *</label>
-                <button type="button" onclick="addAuthorRow()" class="text-sm text-blue-600 font-medium hover:text-blue-800 flex items-center gap-1">
-                    <i data-lucide="plus-circle" style="width: 16px;"></i> Add Another Author
+            <div class="mb-2 flex items-center justify-between">
+                <label class="text-sm font-medium text-gray-700">Authors *</label>
+                <button
+                    type="button"
+                    onclick="addAuthorRow()"
+                    class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+                >
+                    <i data-lucide="plus-circle" class="h-4 w-4"></i>
+                    Add Another Author
                 </button>
             </div>
-            
+
             <div id="authors-container" class="space-y-3">
                 <!-- Rows will be added here by JS, start with one -->
             </div>
         </div>
 
         <div class="flex gap-2">
-            <button type="submit" class="btn btn-primary">Save Book</button>
-            <a href="manage_books.php" class="btn" style="background: #e5e7eb; color: #374151;">Cancel</a>
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+                Save Book
+            </button>
+            <a
+                href="manage_books.php"
+                class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+            >
+                Cancel
+            </a>
         </div>
     </form>
 </div>
@@ -185,19 +231,34 @@ const existingAuthors = <?php echo json_encode($authors); ?>;
 
 function createAuthorRow(index) {
     const row = document.createElement('div');
-    row.className = 'flex gap-2 items-start author-row';
+    row.className = 'flex items-start gap-2 author-row';
     row.innerHTML = `
         <div class="flex-grow">
-            <select name="authors[${index}][id]" class="form-control" required onchange="toggleAuthorInput(this, ${index})">
+            <select
+                name="authors[${index}][id]"
+                required
+                onchange="toggleAuthorInput(this, ${index})"
+                class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
                 <option value="">Select Author</option>
+                <option value="new" style="font-weight: bold; color: #2563eb;">+ Add New Author</option>
                 ${existingAuthors.map(a => `<option value="${a.author_id}">${escapeHtml(a.name)}</option>`).join('')}
-                <option value="new" class="font-bold text-blue-600">+ Add New Author</option>
             </select>
-            <input type="text" name="authors[${index}][new_name]" class="form-control mt-2 hidden" placeholder="Enter New Author Name">
+            <input
+                type="text"
+                name="authors[${index}][new_name]"
+                placeholder="Enter New Author Name"
+                class="hidden mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
         </div>
         ${index > 0 ? `
-        <button type="button" onclick="this.closest('.author-row').remove()" class="p-2 text-red-500 hover:bg-red-50 rounded" title="Remove">
-            <i data-lucide="trash-2" style="width: 18px;"></i>
+        <button
+            type="button"
+            onclick="this.closest('.author-row').remove(); lucide.createIcons();"
+            title="Remove Author"
+            class="inline-flex h-10 min-w-[42px] items-center justify-center rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+        >
+            <i data-lucide="trash-2" class="h-4 w-4"></i>
         </button>` : ''}
     `;
     return row;

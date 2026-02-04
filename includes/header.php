@@ -5,7 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Management System</title>
+
+    <!-- Tailwind CSS (step 1: add alongside existing styles, do not remove old CSS yet) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Existing custom stylesheet (kept for now to avoid breaking layout) -->
     <link rel="stylesheet" href="/lib_system/library_system/assets/css/style.css">
+
     <!-- Unpkg for Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>

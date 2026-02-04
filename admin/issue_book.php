@@ -75,14 +75,18 @@ include '../includes/header.php';
     <div class="mb-4 p-3 bg-green-100 text-green-700 rounded border border-green-200"><?php echo htmlspecialchars($success); ?></div>
 <?php endif; ?>
 
-<div class="stats-grid" style="grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+<div class="grid grid-cols-1 gap-6 md:grid-cols-[2fr,1fr]">
     <!-- Form Card -->
-    <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
+    <div class="rounded border border-gray-200 bg-white p-6 shadow-sm">
         <form method="POST">
             <input type="hidden" name="action" value="issue_book">
             <div class="mb-4">
-                <label class="block text-sm text-gray-700 mb-1">Member *</label>
-                <select name="member_id" class="form-control" required>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Member *</label>
+                <select
+                    name="member_id"
+                    required
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
                     <option value="">Select Member</option>
                     <?php foreach ($members as $m): ?>
                         <option value="<?php echo $m['member_id']; ?>">
@@ -93,8 +97,12 @@ include '../includes/header.php';
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm text-gray-700 mb-1">Book *</label>
-                <select name="book_id" class="form-control" required>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Book *</label>
+                <select
+                    name="book_id"
+                    required
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
                     <option value="">Select Book</option>
                     <?php foreach ($booksAvailable as $b): ?>
                         <option value="<?php echo $b['book_id']; ?>">
@@ -105,21 +113,32 @@ include '../includes/header.php';
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm text-gray-700 mb-1">Due Date *</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Due Date *</label>
                 <div class="relative">
-                    <input type="date" name="due_date" class="form-control" required value="<?php echo date('Y-m-d', strtotime('+14 days')); ?>">
+                    <input
+                        type="date"
+                        name="due_date"
+                        required
+                        value="<?php echo date('Y-m-d', strtotime('+14 days')); ?>"
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-full">Issue Book</button>
+            <button
+                type="submit"
+                class="inline-flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+                Issue Book
+            </button>
         </form>
     </div>
 
     <!-- Info Card -->
-    <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
+    <div class="rounded border border-gray-200 bg-white p-6 shadow-sm">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Guidelines</h2>
-        <div class="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
-            <ul class="text-sm text-blue-800" style="list-style: disc; padding-left: 1.25rem;">
+        <div class="mb-4 rounded border border-blue-200 bg-blue-50 p-4">
+            <ul class="list-disc pl-5 text-sm text-blue-800">
                 <li class="mb-1">Standard loan period is 14 days.</li>
                 <li class="mb-1">Select member and available book.</li>
                 <li>Verify member status before issuing.</li>

@@ -74,41 +74,65 @@ $transactions = $stmt->fetchAll();
 include '../includes/header.php';
 ?>
 
-<div class="mb-6 flex justify-between items-center">
+<div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-2xl text-gray-900 mb-1">Detailed Transactions</h1>
-        <p class="text-gray-600">View and manage all borrowing history</p>
+        <h1 class="mb-1 text-2xl font-semibold text-gray-900">Detailed Transactions</h1>
+        <p class="text-sm text-gray-600">View and manage all borrowing history</p>
     </div>
     <div class="flex gap-2">
-        <a href="issue_book.php" class="btn btn-primary">
-            <i data-lucide="arrow-up-right"></i> Issue Book
+        <a
+            href="issue_book.php"
+            class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+        >
+            <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+            Issue Book
         </a>
-        <a href="return_book.php" class="btn btn-secondary" style="background: white; border: 1px solid var(--gray-300); color: var(--gray-700);">
-            <i data-lucide="arrow-down-left"></i> Return Book
+        <a
+            href="return_book.php"
+            class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+        >
+            <i data-lucide="arrow-down-left" class="h-4 w-4"></i>
+            Return Book
         </a>
     </div>
 </div>
 
 <?php if ($success): ?>
-    <div class="mb-4 p-3 bg-green-100 text-green-700 rounded border border-green-200"><?php echo htmlspecialchars($success); ?></div>
+    <div class="mb-4 rounded-md border border-green-200 bg-green-100 px-4 py-3 text-sm text-green-700">
+        <?php echo htmlspecialchars($success); ?>
+    </div>
 <?php endif; ?>
 
 <!-- Search & Sort -->
-<div class="mb-6 bg-white p-4 rounded shadow-sm border border-gray-200">
-    <form method="GET" class="flex gap-4 items-center flex-wrap">
-        <div class="header-search" style="margin: 0; flex: 1; min-width: 200px;">
-            <i data-lucide="search"></i>
-            <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by Member, Book, or ID...">
+<div class="mb-6 rounded-md border border-gray-200 bg-white p-4 shadow-sm">
+    <form method="GET" class="flex flex-wrap items-center gap-4">
+        <div class="relative min-w-[220px] flex-1">
+            <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+            <input
+                type="text"
+                name="search"
+                value="<?php echo htmlspecialchars($search); ?>"
+                placeholder="Search by Member, Book, or ID..."
+                class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
         </div>
         
-        <select name="status" class="form-control" style="width: 150px;" onchange="this.form.submit()">
+        <select
+            name="status"
+            onchange="this.form.submit()"
+            class="block w-full max-w-[150px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        >
             <option value="Active" <?php echo $statusFilter === 'Active' ? 'selected' : ''; ?>>Active (Issued)</option>
             <option value="Overdue" <?php echo $statusFilter === 'Overdue' ? 'selected' : ''; ?>>Overdue</option>
             <option value="Returned" <?php echo $statusFilter === 'Returned' ? 'selected' : ''; ?>>Returned</option>
             <option value="All" <?php echo $statusFilter === 'All' ? 'selected' : ''; ?>>All History</option>
         </select>
 
-        <select name="sort" class="form-control" style="width: 200px;" onchange="this.form.submit()">
+        <select
+            name="sort"
+            onchange="this.form.submit()"
+            class="block w-full max-w-[220px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        >
             <?php foreach ($validSorts as $val => $label): ?>
                 <option value="<?php echo $val; ?>" <?php echo $sort === $val ? 'selected' : ''; ?>>
                     <?php echo $label; ?>
@@ -163,8 +187,12 @@ include '../includes/header.php';
                             </td>
                             <td>
                                 <?php if (!$t['return_date']): ?>
-                                    <a href="return_book.php?id=<?php echo $t['issue_id']; ?>" class="btn text-blue-600 hover:bg-blue-50" title="Return Book">
-                                        <i data-lucide="corner-down-left" style="width: 16px; height: 16px;"></i>
+                                    <a
+                                        href="return_book.php?id=<?php echo $t['issue_id']; ?>"
+                                        title="Return Book"
+                                        class="inline-flex items-center justify-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                                    >
+                                        <i data-lucide="corner-down-left" class="h-4 w-4"></i>
                                     </a>
                                 <?php endif; ?>
                             </td>

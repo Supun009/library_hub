@@ -78,59 +78,107 @@ $members = $stmt->fetchAll();
 include '../includes/header.php';
 ?>
 
-<div class="mb-6 flex justify-between items-center">
+<div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-2xl text-gray-900 mb-1">Member Management</h1>
-        <p class="text-gray-600">Register and manage library members</p>
+        <h1 class="mb-1 text-2xl font-semibold text-gray-900">Member Management</h1>
+        <p class="text-sm text-gray-600">Register and manage library members</p>
     </div>
-    <button onclick="document.getElementById('addMemberForm').classList.toggle('hidden')" class="btn btn-primary">
-        <i data-lucide="user-plus"></i>
+    <button
+        onclick="document.getElementById('addMemberForm').classList.toggle('hidden')"
+        class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+    >
+        <i data-lucide="user-plus" class="h-4 w-4"></i>
         Add New Member
     </button>
 </div>
 
 <?php if ($error): ?>
-    <div class="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-200"><?php echo htmlspecialchars($error); ?></div>
+    <div class="mb-4 rounded-md border border-red-200 bg-red-100 px-4 py-3 text-sm text-red-700">
+        <?php echo htmlspecialchars($error); ?>
+    </div>
 <?php endif; ?>
 <?php if ($success): ?>
-    <div class="mb-4 p-3 bg-green-100 text-green-700 rounded border border-green-200"><?php echo htmlspecialchars($success); ?></div>
+    <div class="mb-4 rounded-md border border-green-200 bg-green-100 px-4 py-3 text-sm text-green-700">
+        <?php echo htmlspecialchars($success); ?>
+    </div>
 <?php endif; ?>
 
 <!-- Add Member Form (Hidden by default) -->
-<div id="addMemberForm" class="hidden mb-6 bg-white p-6 rounded shadow-sm border border-gray-200">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Register New Member</h2>
+<div id="addMemberForm" class="hidden mb-6 rounded border border-gray-200 bg-white p-6 shadow-sm">
+    <h2 class="mb-4 text-lg font-semibold text-gray-900">Register New Member</h2>
     <form method="POST">
         <input type="hidden" name="action" value="add_member">
-        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+        <div class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Full Name</label>
-                <input type="text" name="full_name" class="form-control" required placeholder="e.g. John Doe">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Full Name</label>
+                <input
+                    type="text"
+                    name="full_name"
+                    required
+                    placeholder="e.g. John Doe"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" class="form-control" required placeholder="john@example.com">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
+                <input
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="john@example.com"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Username / Student ID</label>
-                <input type="text" name="username" class="form-control" required placeholder="e.g. STU001">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Username / Student ID</label>
+                <input
+                    type="text"
+                    name="username"
+                    required
+                    placeholder="e.g. STU001"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Password</label>
-                <input type="password" name="password" class="form-control" required placeholder="Default password">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    required
+                    placeholder="Default password"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
         </div>
         <div class="flex gap-2">
-            <button type="submit" class="btn btn-primary">Register Member</button>
-            <button type="button" onclick="document.getElementById('addMemberForm').classList.add('hidden')" class="btn" style="background: #e5e7eb; color: #374151;">Cancel</button>
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+                Register Member
+            </button>
+            <button
+                type="button"
+                onclick="document.getElementById('addMemberForm').classList.add('hidden')"
+                class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+            >
+                Cancel
+            </button>
         </div>
     </form>
 </div>
 
 <!-- Search Bar -->
-<div class="mb-6 bg-white p-4 rounded shadow-sm border border-gray-200">
-    <form method="GET" class="header-search" style="margin: 0; max-width: 100%;">
-        <i data-lucide="search"></i>
-        <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search members by name, email, or ID...">
+<div class="mb-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <form method="GET" class="relative max-w-full">
+        <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+        <input
+            type="text"
+            name="search"
+            value="<?php echo htmlspecialchars($search); ?>"
+            placeholder="Search members by name, email, or ID..."
+            class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        >
     </form>
 </div>
 
@@ -166,8 +214,11 @@ include '../includes/header.php';
                                 </span>
                             </td>
                             <td>
-                                <a href="edit_member.php?id=<?php echo $member['member_id']; ?>" class="btn" style="padding: 0.25rem 0.5rem; color: var(--primary-color);">
-                                    <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
+                                <a
+                                    href="edit_member.php?id=<?php echo $member['member_id']; ?>"
+                                    class="inline-flex items-center justify-center rounded-md border border-indigo-200 bg-white px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                >
+                                    <i data-lucide="edit" class="h-4 w-4"></i>
                                 </a>
                             </td>
                         </tr>

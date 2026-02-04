@@ -115,7 +115,9 @@ include '../includes/header.php';
 </div>
 
 <?php if ($message): ?>
-    <div class="mb-6 rounded <?php echo $messageType === 'success' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 border-red-200'; ?> p-4">
+    <div class="mb-6 rounded-md border p-4 text-sm <?php echo $messageType === 'success'
+        ? 'border-green-200 bg-green-100 text-green-700'
+        : 'border-red-200 text-red-700'; ?>">
         <?php echo htmlspecialchars($message); ?>
     </div>
 <?php endif; ?>
@@ -143,42 +145,73 @@ include '../includes/header.php';
 
     <!-- Main Content -->
     <div class="lg:col-span-3">
-        <div class="bg-white rounded shadow-sm border border-gray-200 p-6">
+        <div class="rounded border border-gray-200 bg-white p-6 shadow-sm">
             
             <!-- Profile Section -->
             <?php if ($activeTab === 'profile'): ?>
-                <div class="flex items-center gap-3 mb-6">
-                    <i data-lucide="user" class="text-indigo-600" style="width: 24px; height: 24px;"></i>
-                    <h2 class="text-xl text-gray-900 font-semibold">Profile Information</h2>
+                <div class="mb-6 flex items-center gap-3">
+                    <i data-lucide="user" class="h-6 w-6 text-indigo-600"></i>
+                    <h2 class="text-xl font-semibold text-gray-900">Profile Information</h2>
                 </div>
 
                 <form method="POST" class="space-y-6">
                     <input type="hidden" name="action" value="update_profile">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">Full Name</label>
-                            <input type="text" name="full_name" value="<?php echo htmlspecialchars($userProfile['full_name'] ?? ''); ?>" class="form-control" required>
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Full Name</label>
+                            <input
+                                type="text"
+                                name="full_name"
+                                value="<?php echo htmlspecialchars($userProfile['full_name'] ?? ''); ?>"
+                                required
+                                class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                            >
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">Email Address</label>
-                            <input type="email" name="email" value="<?php echo htmlspecialchars($userProfile['email'] ?? ''); ?>" class="form-control" required>
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Email Address</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value="<?php echo htmlspecialchars($userProfile['email'] ?? ''); ?>"
+                                required
+                                class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                            >
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">Phone Number</label>
-                            <input type="text" name="phone" value="<?php echo htmlspecialchars($userProfile['phone_number'] ?? ''); ?>" class="form-control" placeholder="+1 234-567-8900">
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Phone Number</label>
+                            <input
+                                type="text"
+                                name="phone"
+                                value="<?php echo htmlspecialchars($userProfile['phone_number'] ?? ''); ?>"
+                                placeholder="+1 234-567-8900"
+                                class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                            >
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-700 mb-1">Employee ID (Username)</label>
-                            <input type="text" value="<?php echo htmlspecialchars($userProfile['username']); ?>" class="form-control bg-gray-50 text-gray-500" disabled>
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Employee ID (Username)</label>
+                            <input
+                                type="text"
+                                value="<?php echo htmlspecialchars($userProfile['username']); ?>"
+                                disabled
+                                class="block w-full cursor-not-allowed rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500"
+                            >
                         </div>
                         <div class="md:col-span-2">
-                             <label class="block text-sm text-gray-700 mb-1">Role</label>
-                             <input type="text" value="<?php echo ucfirst($userProfile['role_name']); ?>" class="form-control bg-gray-50 text-gray-500" disabled>
+                             <label class="mb-1 block text-sm font-medium text-gray-700">Role</label>
+                             <input
+                                type="text"
+                                value="<?php echo ucfirst($userProfile['role_name']); ?>"
+                                disabled
+                                class="block w-full cursor-not-allowed rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500"
+                             >
                         </div>
                     </div>
                     <div class="flex justify-end pt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="save" style="width: 18px;"></i>
+                        <button
+                            type="submit"
+                            class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+                        >
+                            <i data-lucide="save" class="h-4 w-4"></i>
                             Save Changes
                         </button>
                     </div>
@@ -186,29 +219,47 @@ include '../includes/header.php';
 
             <!-- Password Section -->
             <?php elseif ($activeTab === 'password'): ?>
-                <div class="flex items-center gap-3 mb-6">
-                    <i data-lucide="lock" class="text-indigo-600" style="width: 24px; height: 24px;"></i>
-                    <h2 class="text-xl text-gray-900 font-semibold">Change Password</h2>
+                <div class="mb-6 flex items-center gap-3">
+                    <i data-lucide="lock" class="h-6 w-6 text-indigo-600"></i>
+                    <h2 class="text-xl font-semibold text-gray-900">Change Password</h2>
                 </div>
 
                 <form method="POST" class="max-w-md space-y-4">
                     <input type="hidden" name="action" value="change_password">
                     <div>
-                        <label class="block text-sm text-gray-700 mb-1">Current Password</label>
-                        <input type="password" name="current_password" class="form-control" required placeholder="Enter current password">
+                        <label class="mb-1 block text-sm font-medium text-gray-700">Current Password</label>
+                        <input
+                            type="password"
+                            name="current_password"
+                            required
+                            placeholder="Enter current password"
+                            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                        >
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-700 mb-1">New Password</label>
-                        <input type="password" name="new_password" class="form-control" required placeholder="Enter new password">
+                        <label class="mb-1 block text-sm font-medium text-gray-700">New Password</label>
+                        <input
+                            type="password"
+                            name="new_password"
+                            required
+                            placeholder="Enter new password"
+                            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                        >
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-700 mb-1">Confirm New Password</label>
-                        <input type="password" name="confirm_password" class="form-control" required placeholder="Confirm new password">
+                        <label class="mb-1 block text-sm font-medium text-gray-700">Confirm New Password</label>
+                        <input
+                            type="password"
+                            name="confirm_password"
+                            required
+                            placeholder="Confirm new password"
+                            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                        >
                     </div>
                     
-                    <div class="bg-blue-50 border border-blue-200 rounded p-4 mt-4">
-                        <h3 class="text-sm font-semibold text-blue-900 mb-2">Password Requirements</h3>
-                        <ul class="text-sm text-blue-800 list-disc pl-5">
+                    <div class="mt-4 rounded border border-blue-200 bg-blue-50 p-4">
+                        <h3 class="mb-2 text-sm font-semibold text-blue-900">Password Requirements</h3>
+                        <ul class="list-disc pl-5 text-sm text-blue-800">
                             <li>At least 8 characters long</li>
                             <li>Include uppercase & lowercase letters</li>
                             <li>Include numbers</li>
@@ -216,8 +267,11 @@ include '../includes/header.php';
                     </div>
 
                     <div class="flex justify-end pt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="save" style="width: 18px;"></i>
+                        <button
+                            type="submit"
+                            class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+                        >
+                            <i data-lucide="save" class="h-4 w-4"></i>
                             Update Password
                         </button>
                     </div>
@@ -225,9 +279,9 @@ include '../includes/header.php';
 
             <!-- System Settings Section -->
             <?php elseif ($activeTab === 'settings'): ?>
-                <div class="flex items-center gap-3 mb-6">
-                    <i data-lucide="settings" class="text-indigo-600" style="width: 24px; height: 24px;"></i>
-                    <h2 class="text-xl text-gray-900 font-semibold">System Settings</h2>
+                <div class="mb-6 flex items-center gap-3">
+                    <i data-lucide="settings" class="h-6 w-6 text-indigo-600"></i>
+                    <h2 class="text-xl font-semibold text-gray-900">System Settings</h2>
                 </div>
 
                 <form method="POST" class="space-y-6">
@@ -235,25 +289,44 @@ include '../includes/header.php';
                     
                     <div>
                         <h3 class="text-base text-gray-900 font-medium mb-3">Library Policies</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
-                                <label class="block text-sm text-gray-700 mb-1">Fine Per Day ($)</label>
-                                <input type="number" step="0.01" name="fine_per_day" value="<?php echo htmlspecialchars($settings['fine_per_day'] ?? '0.50'); ?>" class="form-control">
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Fine Per Day ($)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    name="fine_per_day"
+                                    value="<?php echo htmlspecialchars($settings['fine_per_day'] ?? '0.50'); ?>"
+                                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                >
                             </div>
                             <div>
-                                <label class="block text-sm text-gray-700 mb-1">Max Books Per Member</label>
-                                <input type="number" name="max_books_per_member" value="<?php echo htmlspecialchars($settings['max_books_per_member'] ?? '5'); ?>" class="form-control">
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Max Books Per Member</label>
+                                <input
+                                    type="number"
+                                    name="max_books_per_member"
+                                    value="<?php echo htmlspecialchars($settings['max_books_per_member'] ?? '5'); ?>"
+                                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                >
                             </div>
                             <div>
-                                <label class="block text-sm text-gray-700 mb-1">Loan Period (Days)</label>
-                                <input type="number" name="loan_period_days" value="<?php echo htmlspecialchars($settings['loan_period_days'] ?? '14'); ?>" class="form-control">
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Loan Period (Days)</label>
+                                <input
+                                    type="number"
+                                    name="loan_period_days"
+                                    value="<?php echo htmlspecialchars($settings['loan_period_days'] ?? '14'); ?>"
+                                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                >
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex justify-end pt-4 border-t border-gray-200">
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="save" style="width: 18px;"></i>
+                    <div class="flex justify-end border-t border-gray-200 pt-4">
+                        <button
+                            type="submit"
+                            class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+                        >
+                            <i data-lucide="save" class="h-4 w-4"></i>
                             Save Settings
                         </button>
                     </div>
