@@ -9,48 +9,60 @@ $pageTitle = 'Issue Book';
 $error = '';
 $success = '';
 
-// Handle Issue Book
+// Handle Issue Book (Multiple Books Support)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'issue_book') {
     $memberId = $_POST['member_id'];
-    $bookId = $_POST['book_id'];
+    $bookIds = $_POST['book_ids'] ?? []; // Array of book IDs
     $dueDate = $_POST['due_date'];
 
-    if (empty($memberId) || empty($bookId) || empty($dueDate)) {
-        $error = "All fields are required for issuing.";
+    if (empty($memberId) || empty($bookIds) || empty($dueDate)) {
+        $error = "Please select a member and at least one book.";
     } else {
         try {
-            // Check availability
-            $stmt = $pdo->prepare("SELECT status_id FROM books WHERE book_id = ?");
-            $stmt->execute([$bookId]);
-            $bookStatus = $stmt->fetchColumn();
-            
-            // Get 'Available' status ID
+            // Get status IDs
             $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Available'");
             $availableStatusId = $stmt->fetchColumn();
 
-             // Get 'Issued' status ID
-             $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Issued'");
-             $issuedStatusId = $stmt->fetchColumn();
+            $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Issued'");
+            $issuedStatusId = $stmt->fetchColumn();
 
-             if ($bookStatus != $availableStatusId) {
-                 $error = "This book is not available for issue.";
-             } else {
+            // Validate all books are available
+            $unavailableBooks = [];
+            foreach ($bookIds as $bookId) {
+                $stmt = $pdo->prepare("SELECT title, status_id FROM books WHERE book_id = ?");
+                $stmt->execute([$bookId]);
+                $book = $stmt->fetch();
+                
+                if (!$book || $book['status_id'] != $availableStatusId) {
+                    $unavailableBooks[] = $book ? $book['title'] : "Book ID: $bookId";
+                }
+            }
+
+            if (!empty($unavailableBooks)) {
+                $error = "The following books are not available: " . implode(", ", $unavailableBooks);
+            } else {
                 $pdo->beginTransaction();
                 
-                // 1. Insert Issue Record
-                $stmt = $pdo->prepare("INSERT INTO issues (book_id, member_id, issue_date, due_date) VALUES (?, ?, CURDATE(), ?)");
-                $stmt->execute([$bookId, $memberId, $dueDate]);
-                
-                // 2. Update Book Status to Issued
-                $stmt = $pdo->prepare("UPDATE books SET status_id = ? WHERE book_id = ?");
-                $stmt->execute([$issuedStatusId, $bookId]);
+                // Issue all books
+                foreach ($bookIds as $bookId) {
+                    // 1. Insert Issue Record
+                    $stmt = $pdo->prepare("INSERT INTO issues (book_id, member_id, issue_date, due_date) VALUES (?, ?, CURDATE(), ?)");
+                    $stmt->execute([$bookId, $memberId, $dueDate]);
+                    
+                    // 2. Update Book Status to Issued
+                    $stmt = $pdo->prepare("UPDATE books SET status_id = ? WHERE book_id = ?");
+                    $stmt->execute([$issuedStatusId, $bookId]);
+                }
                 
                 $pdo->commit();
-                header("Location: transactions.php?msg=issued");
+                $bookCount = count($bookIds);
+                header("Location: transactions.php?msg=issued&count=$bookCount");
                 exit;
-             }
+            }
         } catch (PDOException $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $error = "Issue failed: " . $e->getMessage();
         }
     }
@@ -78,7 +90,7 @@ include '../includes/header.php';
 <div class="grid grid-cols-1 gap-6 md:grid-cols-[2fr,1fr]">
     <!-- Form Card -->
     <div class="rounded border border-gray-200 bg-white p-6 shadow-sm">
-        <form method="POST">
+        <form method="POST" id="issueForm">
             <input type="hidden" name="action" value="issue_book">
             <div class="mb-4">
                 <label class="mb-1 block text-sm font-medium text-gray-700">Member *</label>
@@ -97,19 +109,20 @@ include '../includes/header.php';
             </div>
 
             <div class="mb-4">
-                <label class="mb-1 block text-sm font-medium text-gray-700">Book *</label>
-                <select
-                    name="book_id"
-                    required
-                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                >
-                    <option value="">Select Book</option>
-                    <?php foreach ($booksAvailable as $b): ?>
-                        <option value="<?php echo $b['book_id']; ?>">
-                            <?php echo htmlspecialchars($b['title'] . " - " . $b['isbn']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="mb-2 flex items-center justify-between">
+                    <label class="block text-sm font-medium text-gray-700">Books *</label>
+                    <button
+                        type="button"
+                        onclick="addBookRow()"
+                        class="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+                    >
+                        <i data-lucide="plus" class="h-3 w-3"></i>
+                        Add Book
+                    </button>
+                </div>
+                <div id="books-container" class="space-y-2">
+                    <!-- Book rows will be added here by JavaScript -->
+                </div>
             </div>
 
             <div class="mb-4">
@@ -129,7 +142,7 @@ include '../includes/header.php';
                 type="submit"
                 class="inline-flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
             >
-                Issue Book
+                Issue Selected Books
             </button>
         </form>
     </div>
@@ -140,11 +153,67 @@ include '../includes/header.php';
         <div class="mb-4 rounded border border-blue-200 bg-blue-50 p-4">
             <ul class="list-disc pl-5 text-sm text-blue-800">
                 <li class="mb-1">Standard loan period is 14 days.</li>
-                <li class="mb-1">Select member and available book.</li>
+                <li class="mb-1">You can issue multiple books at once.</li>
+                <li class="mb-1">Select member and available books.</li>
                 <li>Verify member status before issuing.</li>
             </ul>
         </div>
     </div>
 </div>
+
+<script>
+const availableBooks = <?php echo json_encode($booksAvailable); ?>;
+let bookRowIndex = 0;
+
+function createBookRow(index) {
+    const row = document.createElement('div');
+    row.className = 'flex items-start gap-2 book-row';
+    row.innerHTML = `
+        <select
+            name="book_ids[]"
+            required
+            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        >
+            <option value="">Select Book</option>
+            ${availableBooks.map(b => `<option value="${b.book_id}">${escapeHtml(b.title)} - ${escapeHtml(b.isbn)}</option>`).join('')}
+        </select>
+        ${index > 0 ? `
+        <button
+            type="button"
+            onclick="this.closest('.book-row').remove(); updateBookCount();"
+            title="Remove Book"
+            class="inline-flex h-10 min-w-[42px] items-center justify-center rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+        >
+            <i data-lucide="trash-2" class="h-4 w-4"></i>
+        </button>` : ''}
+    `;
+    return row;
+}
+
+function addBookRow() {
+    const container = document.getElementById('books-container');
+    container.appendChild(createBookRow(bookRowIndex++));
+    lucide.createIcons();
+    updateBookCount();
+}
+
+function updateBookCount() {
+    const count = document.querySelectorAll('.book-row').length;
+    if (count === 0) {
+        addBookRow(); // Always have at least one row
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Initialize with one book row
+document.addEventListener('DOMContentLoaded', () => {
+    addBookRow();
+});
+</script>
 
 <?php include '../includes/footer.php'; ?>

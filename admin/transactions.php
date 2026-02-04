@@ -10,9 +10,15 @@ $success = '';
 
 if (isset($_GET['msg'])) {
     if ($_GET['msg'] === 'issued') {
-        $success = "Book issued successfully.";
+        $count = isset($_GET['count']) ? intval($_GET['count']) : 1;
+        $success = $count > 1 
+            ? "Successfully issued $count books." 
+            : "Book issued successfully.";
     } elseif ($_GET['msg'] === 'returned') {
-        $success = "Book returned successfully.";
+        $count = isset($_GET['count']) ? intval($_GET['count']) : 1;
+        $success = $count > 1 
+            ? "Successfully returned $count books." 
+            : "Book returned successfully.";
     }
 }
 
