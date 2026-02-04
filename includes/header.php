@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Management System</title>
     <link rel="stylesheet" href="/lib_system/library_system/assets/css/style.css">
+    <!-- Unpkg for Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <div class="wrapper">
@@ -13,12 +15,23 @@
         
         <div class="main-content">
             <header class="top-header">
-                <div class="page-title">
-                    <h2><?php echo isset($pageTitle) ? $pageTitle : 'Library System'; ?></h2>
+                <!-- Global Search -->
+                <div class="header-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search books, members, or transactions...">
                 </div>
+
                 <div class="user-menu">
-                    <span class="user-name">Welcome, <?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></span>
-                    <a href="/lib_system/library_system/auth/logout.php" class="btn-logout">Logout</a>
+                    <div class="user-info">
+                        <span class="user-name"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></span>
+                        <span class="user-role"><?php echo hasRole('admin') ? 'Administrator' : 'Member'; ?></span>
+                    </div>
+                    <div class="user-avatar">
+                        <?php echo strtoupper(substr($_SESSION['username'] ?? 'U', 0, 2)); ?>
+                    </div>
+                    <a href="/lib_system/library_system/auth/logout.php" class="btn-logout" title="Logout">
+                        <i data-lucide="log-out" style="width: 20px; height: 20px;"></i>
+                    </a>
                 </div>
             </header>
             
