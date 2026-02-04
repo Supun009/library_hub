@@ -18,6 +18,12 @@
                 </a>
             </li>
             <li>
+                <a href="/lib_system/library_system/admin/search.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'search.php' ? 'active' : ''; ?>">
+                    <i data-lucide="search"></i>
+                    <span>Advanced Search</span>
+                </a>
+            </li>
+            <li>
                 <a href="/lib_system/library_system/admin/manage_members.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'manage_members.php' ? 'active' : ''; ?>">
                     <i data-lucide="users"></i>
                     <span>Member Management</span>
@@ -34,6 +40,12 @@
                 <a href="/lib_system/library_system/member/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
                     <i data-lucide="book-open"></i>
                     <span>Browse Catalog</span>
+                </a>
+            </li>
+            <li>
+                <a href="/lib_system/library_system/member/search.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'search.php' ? 'active' : ''; ?>">
+                    <i data-lucide="search"></i>
+                    <span>Advanced Search</span>
                 </a>
             </li>
             <li>
