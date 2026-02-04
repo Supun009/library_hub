@@ -46,7 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $stmt->execute([$issuedStatusId, $bookId]);
                 
                 $pdo->commit();
-                $success = "Book issued successfully.";
+                header("Location: transactions.php?msg=issued");
+                exit;
              }
         } catch (PDOException $e) {
             $pdo->rollBack();

@@ -6,6 +6,15 @@ require_once '../includes/auth_middleware.php';
 requireRole('admin');
 
 $pageTitle = 'Transactions List';
+$success = '';
+
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] === 'issued') {
+        $success = "Book issued successfully.";
+    } elseif ($_GET['msg'] === 'returned') {
+        $success = "Book returned successfully.";
+    }
+}
 
 // Fetch Transactions
 $search = $_GET['search'] ?? '';
@@ -79,6 +88,10 @@ include '../includes/header.php';
         </a>
     </div>
 </div>
+
+<?php if ($success): ?>
+    <div class="mb-4 p-3 bg-green-100 text-green-700 rounded border border-green-200"><?php echo htmlspecialchars($success); ?></div>
+<?php endif; ?>
 
 <!-- Search & Sort -->
 <div class="mb-6 bg-white p-4 rounded shadow-sm border border-gray-200">

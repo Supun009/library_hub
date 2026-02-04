@@ -34,11 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt->execute([$bookId]);
             
             $pdo->commit();
-            $success = "Book returned successfully.";
-            
-            // Clear URL params to prevent re-fill
-            // header("Location: return_book.php?success=1"); 
-            // Keeping it simple for now as we might want to stay on the same member
+            header("Location: transactions.php?msg=returned");
+            exit;
         } catch (PDOException $e) {
             $pdo->rollBack();
             $error = "Return failed: " . $e->getMessage();
