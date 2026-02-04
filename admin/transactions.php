@@ -16,10 +16,13 @@ if (isset($_GET['msg'])) {
     }
 }
 
-// Fetch Transactions
+// Fetch Transactions with Pagination
 $search = $_GET['search'] ?? '';
 $sort = $_GET['sort'] ?? 'i.issue_date DESC';
 $statusFilter = $_GET['status'] ?? 'Active'; // Default to Active (Not Returned)
+$currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$itemsPerPage = 15;
+$offset = ($currentPage - 1) * $itemsPerPage;
 
 $validSorts = [
     'i.issue_date DESC' => 'Date (Newest)',
@@ -32,10 +35,8 @@ if (!array_key_exists($sort, $validSorts)) {
     $sort = 'i.issue_date DESC';
 }
 
-$query = "
-    SELECT i.issue_id, i.issue_date, i.due_date, i.return_date, i.fine_amount,
-           m.full_name, m.member_id,
-           b.title, b.isbn
+// Build base query
+$baseQuery = "
     FROM issues i
     JOIN members m ON i.member_id = m.member_id
     JOIN books b ON i.book_id = b.book_id
@@ -61,14 +62,42 @@ if ($statusFilter === 'Active') {
 }
 // 'All' implies no extra condition
 
+$whereClause = '';
 if (count($conditions) > 0) {
-    $query .= " WHERE " . implode(" AND ", $conditions);
+    $whereClause = " WHERE " . implode(" AND ", $conditions);
 }
 
-$query .= " ORDER BY $sort";
+// Count total items for pagination
+$countQuery = "SELECT COUNT(*) as total " . $baseQuery . $whereClause;
+$countStmt = $pdo->prepare($countQuery);
+$countStmt->execute($params);
+$totalItems = $countStmt->fetch()['total'];
+
+// Fetch transactions with pagination
+$query = "
+    SELECT i.issue_id, i.issue_date, i.due_date, i.return_date, i.fine_amount,
+           m.full_name, m.member_id,
+           b.title, b.isbn
+    " . $baseQuery . $whereClause . "
+    ORDER BY $sort
+    LIMIT :limit OFFSET :offset
+";
 
 $stmt = $pdo->prepare($query);
-$stmt->execute($params);
+
+// Bind search parameters if they exist
+$paramIndex = 1;
+if ($search) {
+    $stmt->bindValue($paramIndex++, "%$search%", PDO::PARAM_STR);
+    $stmt->bindValue($paramIndex++, "%$search%", PDO::PARAM_STR);
+    $stmt->bindValue($paramIndex++, $search, PDO::PARAM_INT);
+}
+
+// Bind pagination parameters as integers
+$stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+$stmt->execute();
 $transactions = $stmt->fetchAll();
 
 include '../includes/header.php';
@@ -144,6 +173,10 @@ include '../includes/header.php';
 
 <!-- Transactions Table -->
 <div class="table-container">
+    <div class="table-header">
+        <h2 class="text-lg font-semibold text-gray-900">Transaction History</h2>
+        <p class="text-gray-500 text-sm mt-1">Total: <?php echo $totalItems; ?> transaction(s)</p>
+    </div>
     <div class="overflow-x-auto">
         <table>
             <thead>
@@ -167,7 +200,7 @@ include '../includes/header.php';
                             $statusClass = $t['return_date'] ? 'badge-green' : ($isOverdue ? 'badge-red' : 'badge-blue');
                         ?>
                         <tr>
-                            <td class="text-gray-500">#<?php echo $t['issue_id']; ?></td>
+                            <td class="text-gray-500"><?php echo $t['issue_id']; ?></td>
                             <td class="font-medium"><?php echo htmlspecialchars($t['full_name']); ?></td>
                             <td>
                                 <p class="text-sm text-gray-900"><?php echo htmlspecialchars($t['title']); ?></p>
@@ -205,5 +238,15 @@ include '../includes/header.php';
         </table>
     </div>
 </div>
+
+<?php
+// Include and render pagination
+require_once '../includes/pagination.php';
+renderPagination($currentPage, $totalItems, $itemsPerPage, [
+    'search' => $search,
+    'status' => $statusFilter,
+    'sort' => $sort
+]);
+?>
 
 <?php include '../includes/footer.php'; ?>
