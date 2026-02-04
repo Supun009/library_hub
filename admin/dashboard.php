@@ -116,7 +116,6 @@ try {
                     <th>ID</th>
                     <th>Member</th>
                     <th>Book</th>
-                    <th>Type</th>
                     <th>Date</th>
                     <th>Status</th>
                 </tr>
@@ -125,14 +124,9 @@ try {
                 <?php if (count($recentTransactions) > 0): ?>
                     <?php foreach ($recentTransactions as $txn): ?>
                         <tr>
-                            <td>TXN-<?php echo $txn['issue_id']; ?></td>
+                            <td><?php echo $txn['issue_id']; ?></td>
                             <td><?php echo htmlspecialchars($txn['member_name']); ?></td>
                             <td><?php echo htmlspecialchars($txn['book_title']); ?></td>
-                            <td>
-                                <span class="badge <?php echo $txn['return_date'] ? 'badge-purple' : 'badge-blue'; ?>">
-                                    <?php echo $txn['return_date'] ? 'Return' : 'Issue'; ?>
-                                </span>
-                            </td>
                             <td><?php echo $txn['return_date'] ? $txn['return_date'] : $txn['issue_date']; ?></td>
                             <td>
                                 <span class="badge <?php echo $txn['return_date'] ? 'badge-gray' : 'badge-green'; ?>">
@@ -143,7 +137,7 @@ try {
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="6" class="text-center">No transactions found.</td>
+                        <td colspan="5" class="text-center">No transactions found.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

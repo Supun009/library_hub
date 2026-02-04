@@ -92,20 +92,25 @@ include '../includes/header.php';
 </div>
 
 <!-- Books Grid -->
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     <?php foreach ($books as $book): ?>
-        <div class="bg-white p-5 rounded shadow-sm border border-gray-200 hover:shadow-md transition-shadow flex flex-col">
-            <div class="mb-3" style="flex: 1;">
-                <h3 class="font-semibold text-gray-900 mb-1 truncate" title="<?php echo htmlspecialchars($book['title']); ?>">
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full hover:shadow-md transition-shadow">
+            
+            <div class="flex-grow">
+                <h3 class="font-bold text-gray-900 text-lg mb-1 truncate" title="<?php echo htmlspecialchars($book['title']); ?>">
                     <?php echo htmlspecialchars($book['title']); ?>
                 </h3>
-                <p class="text-sm text-gray-600 mb-1"><?php echo htmlspecialchars($book['authors']); ?></p>
-                <p class="text-xs text-gray-500">ISBN: <?php echo htmlspecialchars($book['isbn']); ?></p>
+                <p class="text-sm text-gray-600 mb-2 italic"><?php echo htmlspecialchars($book['authors']); ?></p>
+                <p class="text-xs font-mono text-gray-400">ISBN: <?php echo htmlspecialchars($book['isbn']); ?></p>
             </div>
             
-            <div class="flex items-center justify-between mb-4">
-                <span class="badge badge-gray"><?php echo htmlspecialchars($book['category_name']); ?></span>
-                <span class="badge <?php echo $book['status_name'] === 'Available' ? 'badge-green' : 'badge-red'; ?>">
+            <div class="flex items-center justify-between mt-6 mb-4">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    <?php echo htmlspecialchars($book['category_name']); ?>
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $book['status_name'] === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
                     <?php echo htmlspecialchars($book['status_name']); ?>
                 </span>
             </div>
@@ -115,13 +120,9 @@ include '../includes/header.php';
                     <?php echo $book['status_name'] === 'Available' ? '' : 'disabled'; ?>>
                 <?php echo $book['status_name'] === 'Available' ? 'Issue Book' : 'Not Available'; ?>
             </button>
+            
         </div>
     <?php endforeach; ?>
-    <?php if (count($books) === 0): ?>
-        <div class="col-span-full text-center py-12 text-gray-500">
-            No books found.
-        </div>
-    <?php endif; ?>
 </div>
 
 <?php include '../includes/footer.php'; ?>
