@@ -45,9 +45,13 @@ module.exports = defineConfig({
     {
       name: "setup",
       testMatch: /.*\.setup\.js/,
+      use: {
+        baseURL: "http://localhost/lib_system/library_system",
+      },
     },
     {
       name: "chromium",
+      testMatch: /.*\.spec\.js/, // Only run spec files, not setup files
       use: {
         ...devices["Desktop Chrome"],
         // Use authenticated state from setup
