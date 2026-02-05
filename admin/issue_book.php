@@ -93,7 +93,6 @@ $members = $pdo->query("
     ORDER BY m.full_name
 ")->fetchAll();
 
-$booksAvailable = $pdo->query("SELECT book_id, title, isbn FROM books WHERE status_id = (SELECT status_id FROM status WHERE status_name = 'Available')")->fetchAll();
 
 include '../includes/header.php';
 ?>
@@ -145,19 +144,29 @@ include '../includes/header.php';
             </div>
 
             <div class="mb-4">
-                <div class="mb-2 flex items-center justify-between">
-                    <label class="block text-sm font-medium text-gray-700">Books *</label>
-                    <button
-                        type="button"
-                        onclick="addBookRow()"
-                        class="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+                <label class="mb-1 block text-sm font-medium text-gray-700">Search Books *</label>
+                <div class="relative">
+                    <input
+                        type="text"
+                        id="book_search"
+                        placeholder="Search book by title or ISBN..."
+                        autocomplete="off"
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                     >
-                        <i data-lucide="plus" class="h-3 w-3"></i>
-                        Add Book
-                    </button>
+                    <div id="book_dropdown" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                        <!-- Dropdown options will be populated by JavaScript -->
+                    </div>
                 </div>
-                <div id="books-container" class="space-y-2">
-                    <!-- Book rows will be added here by JavaScript -->
+                <p class="mt-1 text-xs text-gray-500">Click on a book to add it to the list below</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="mb-2 block text-sm font-medium text-gray-700">Selected Books</label>
+                <div id="selected-books-list" class="space-y-2 min-h-[60px]">
+                    <!-- Selected books will appear here -->
+                </div>
+                <div id="book-ids-container">
+                    <!-- Hidden inputs for form submission -->
                 </div>
             </div>
 
@@ -202,9 +211,8 @@ include '../includes/header.php';
 // Initialize search functionality when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     const members = <?php echo json_encode($members); ?>;
-    const availableBooks = <?php echo json_encode($booksAvailable); ?>;
     
-    initIssueBookSearch(members, availableBooks);
+    initIssueBookSearch(members);
 });
 </script>
 

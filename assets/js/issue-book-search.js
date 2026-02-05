@@ -3,7 +3,7 @@
  * Handles member and book search with autocomplete dropdowns
  */
 
-let bookRowIndex = 0;
+let selectedBooks = []; // Array to store selected books
 
 /**
  * Initialize member search functionality
@@ -79,90 +79,48 @@ function initMemberSearch(members) {
 }
 
 /**
- * Create a book search row
+ * Initialize book search functionality with AJAX
  */
-function createBookRow(index, availableBooks) {
-  const row = document.createElement("div");
-  row.className = "flex items-start gap-2 book-row";
-  row.innerHTML = `
-        <div class="flex-1 relative">
-            <input
-                type="text"
-                class="book-search block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                placeholder="Search book by title or ISBN..."
-                autocomplete="off"
-                required
-            >
-            <input type="hidden" name="book_ids[]" class="book-id-hidden" required>
-            <div class="book-dropdown absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto"></div>
-        </div>
-        ${
-          index > 0
-            ? `
-        <button
-            type="button"
-            onclick="this.closest('.book-row').remove(); updateBookCount();"
-            title="Remove Book"
-            class="inline-flex h-10 min-w-[42px] items-center justify-center rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-        >
-            <i data-lucide="trash-2" class="h-4 w-4"></i>
-        </button>`
-            : ""
-        }
-    `;
+function initBookSearch() {
+  const bookSearch = document.getElementById("book_search");
+  const bookDropdown = document.getElementById("book_dropdown");
 
-  // Add search functionality to this book row
-  const bookSearch = row.querySelector(".book-search");
-  const bookDropdown = row.querySelector(".book-dropdown");
-  const bookIdHidden = row.querySelector(".book-id-hidden");
+  if (!bookSearch) {
+    console.error("book_search element not found");
+    return;
+  }
+
+  let searchTimeout;
 
   bookSearch.addEventListener("input", function () {
-    const searchTerm = this.value.toLowerCase();
+    const searchTerm = this.value.trim();
+
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
 
     if (searchTerm.length === 0) {
       bookDropdown.classList.add("hidden");
-      bookIdHidden.value = "";
       return;
     }
 
-    const filtered = availableBooks.filter(
-      (b) =>
-        b.title.toLowerCase().includes(searchTerm) ||
-        b.isbn.toLowerCase().includes(searchTerm),
-    );
-
-    if (filtered.length === 0) {
+    if (searchTerm.length < 2) {
       bookDropdown.innerHTML =
-        '<div class="px-3 py-2 text-sm text-gray-500">No books found</div>';
+        '<div class="px-3 py-2 text-sm text-gray-500">Type at least 2 characters to search</div>';
       bookDropdown.classList.remove("hidden");
       return;
     }
 
-    bookDropdown.innerHTML = filtered
-      .slice(0, 10)
-      .map(
-        (b) => `
-            <div class="px-3 py-2 hover:bg-indigo-50 cursor-pointer text-sm book-option" data-id="${b.book_id}" data-title="${escapeHtml(b.title)}" data-isbn="${escapeHtml(b.isbn)}">
-                <div class="font-medium text-gray-900">${escapeHtml(b.title)}</div>
-                <div class="text-xs text-gray-500">ISBN: ${escapeHtml(b.isbn)}</div>
-            </div>
-        `,
-      )
-      .join("");
-
+    // Show loading state
+    bookDropdown.innerHTML =
+      '<div class="px-3 py-2 text-sm text-gray-500">Searching...</div>';
     bookDropdown.classList.remove("hidden");
 
-    // Add click handlers
-    bookDropdown.querySelectorAll(".book-option").forEach((option) => {
-      option.addEventListener("click", function () {
-        const id = this.dataset.id;
-        const title = this.dataset.title;
-
-        bookSearch.value = title;
-        bookIdHidden.value = id;
-        bookDropdown.classList.add("hidden");
-      });
-    });
+    // Debounce the search (wait 300ms after user stops typing)
+    searchTimeout = setTimeout(() => {
+      fetchBooks(searchTerm, bookDropdown);
+    }, 300);
   });
 
   // Hide dropdown when clicking outside
@@ -171,29 +129,143 @@ function createBookRow(index, availableBooks) {
       bookDropdown.classList.add("hidden");
     }
   });
-
-  return row;
 }
 
 /**
- * Add a new book row
+ * Fetch books from server via AJAX
  */
-function addBookRow(availableBooks) {
-  const container = document.getElementById("books-container");
-  container.appendChild(createBookRow(bookRowIndex++, availableBooks));
+function fetchBooks(searchTerm, bookDropdown) {
+  fetch(`ajax_search_books.php?q=${encodeURIComponent(searchTerm)}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((books) => {
+      if (books.length === 0) {
+        bookDropdown.innerHTML =
+          '<div class="px-3 py-2 text-sm text-gray-500">No books found</div>';
+        bookDropdown.classList.remove("hidden");
+        return;
+      }
+
+      // Filter out already selected books
+      const availableBooks = books.filter(
+        (b) => !selectedBooks.find((sb) => sb.book_id === b.book_id),
+      );
+
+      if (availableBooks.length === 0) {
+        bookDropdown.innerHTML =
+          '<div class="px-3 py-2 text-sm text-gray-500">All matching books already selected</div>';
+        bookDropdown.classList.remove("hidden");
+        return;
+      }
+
+      bookDropdown.innerHTML = availableBooks
+        .map(
+          (b) => `
+            <div class="px-3 py-2 hover:bg-indigo-50 cursor-pointer text-sm book-option" data-id="${b.book_id}" data-title="${escapeHtml(b.title)}" data-isbn="${escapeHtml(b.isbn || "")}">
+                <div class="font-medium text-gray-900">${escapeHtml(b.title)}</div>
+                <div class="text-xs text-gray-500">ISBN: ${escapeHtml(b.isbn || "N/A")}</div>
+            </div>
+        `,
+        )
+        .join("");
+
+      bookDropdown.classList.remove("hidden");
+
+      // Add click handlers
+      document.querySelectorAll(".book-option").forEach((option) => {
+        option.addEventListener("click", function () {
+          const id = this.dataset.id;
+          const title = this.dataset.title;
+          const isbn = this.dataset.isbn;
+
+          addBookToList({ book_id: id, title: title, isbn: isbn });
+          document.getElementById("book_search").value = "";
+          bookDropdown.classList.add("hidden");
+        });
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching books:", error);
+      bookDropdown.innerHTML =
+        '<div class="px-3 py-2 text-sm text-red-500">Error loading books. Please try again.</div>';
+      bookDropdown.classList.remove("hidden");
+    });
+}
+
+/**
+ * Add a book to the selected books list
+ */
+function addBookToList(book) {
+  // Check if already added
+  if (selectedBooks.find((b) => b.book_id === book.book_id)) {
+    return;
+  }
+
+  selectedBooks.push(book);
+  renderSelectedBooks();
+}
+
+/**
+ * Remove a book from the selected books list
+ */
+function removeBookFromList(bookId) {
+  selectedBooks = selectedBooks.filter((b) => b.book_id !== bookId);
+  renderSelectedBooks();
+}
+
+/**
+ * Render the selected books list
+ */
+function renderSelectedBooks() {
+  const container = document.getElementById("selected-books-list");
+  const hiddenInputsContainer = document.getElementById("book-ids-container");
+
+  if (!container) return;
+
+  if (selectedBooks.length === 0) {
+    container.innerHTML =
+      '<div class="text-sm text-gray-500 py-2">No books selected. Search and click to add books.</div>';
+    hiddenInputsContainer.innerHTML = "";
+    return;
+  }
+
+  // Render selected books
+  container.innerHTML = selectedBooks
+    .map(
+      (book) => `
+        <div class="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded border border-gray-200">
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium text-gray-900 truncate">${escapeHtml(book.title)}</div>
+                <div class="text-xs text-gray-500">ISBN: ${escapeHtml(book.isbn || "N/A")}</div>
+            </div>
+            <button
+                type="button"
+                onclick="removeBookFromList('${book.book_id}')"
+                class="flex-shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 transition-colors"
+                title="Remove book"
+            >
+                <i data-lucide="x" class="h-4 w-4"></i>
+            </button>
+        </div>
+    `,
+    )
+    .join("");
+
+  // Update hidden inputs for form submission
+  hiddenInputsContainer.innerHTML = selectedBooks
+    .map(
+      (book) =>
+        `<input type="hidden" name="book_ids[]" value="${book.book_id}">`,
+    )
+    .join("");
+
+  // Reinitialize lucide icons
   if (typeof lucide !== "undefined") {
     lucide.createIcons();
-  }
-  updateBookCount();
-}
-
-/**
- * Update book count and ensure at least one row exists
- */
-function updateBookCount() {
-  const count = document.querySelectorAll(".book-row").length;
-  if (count === 0) {
-    addBookRow(window.availableBooks); // Always have at least one row
   }
 }
 
@@ -209,13 +281,13 @@ function escapeHtml(text) {
 /**
  * Initialize the issue book search functionality
  */
-function initIssueBookSearch(members, availableBooks) {
-  // Store books globally for addBookRow function
-  window.availableBooks = availableBooks;
-
+function initIssueBookSearch(members) {
   // Initialize member search
   initMemberSearch(members);
 
-  // Initialize with one book row
-  addBookRow(availableBooks);
+  // Initialize book search (AJAX-based)
+  initBookSearch();
+
+  // Initialize empty selected books list
+  renderSelectedBooks();
 }
