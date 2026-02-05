@@ -65,6 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+// Fetch fine rate from settings
+$stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'fine_per_day'");
+$finePerDay = $stmt ? floatval($stmt->fetchColumn()) : 0.50; // Default to 0.50 if not found
+
 // 1. Fetch Members who have active loans
 $membersWithLoans = $pdo->query("
     SELECT DISTINCT m.member_id, m.full_name, u.username
@@ -103,7 +107,7 @@ if ($prefillId) {
     // fetchColumn returns false if no row, check explicitly
     if ($daysOverdue !== false) {
         if ($daysOverdue > 0) {
-            $prefillFine = $daysOverdue * 0.50;
+            $prefillFine = $daysOverdue * $finePerDay;
         }
     }
 }
@@ -179,7 +183,7 @@ include '../includes/header.php';
                     <?php foreach ($memberLoans as $loan): ?>
                         <?php 
                             $isOverdue = $loan['days_overdue'] > 0;
-                            $estFine = $isOverdue ? $loan['days_overdue'] * 0.50 : 0;
+                            $estFine = $isOverdue ? $loan['days_overdue'] * $finePerDay : 0;
                         ?>
                         <div class="loan-item cursor-pointer rounded border p-3 hover:bg-gray-50 transition-colors" 
                              data-issue-id="<?php echo $loan['issue_id']; ?>"
@@ -248,7 +252,7 @@ include '../includes/header.php';
                 
                 <div class="mb-4 rounded border border-yellow-200 bg-yellow-50 p-4">
                     <h3 class="mb-1 text-sm font-semibold text-yellow-900">Fine Policy</h3>
-                    <p class="text-sm text-yellow-800">$0.50 per day overdue.</p>
+                    <p class="text-sm text-yellow-800">$<?php echo number_format($finePerDay, 2); ?> per day overdue.</p>
                 </div>
 
                 <button

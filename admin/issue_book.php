@@ -124,20 +124,24 @@ include '../includes/header.php';
     <div class="rounded border border-gray-200 bg-white p-6 shadow-sm">
         <form method="POST" id="issueForm">
             <input type="hidden" name="action" value="issue_book">
+            <input type="hidden" name="member_id" id="member_id_hidden" required>
+            
             <div class="mb-4">
                 <label class="mb-1 block text-sm font-medium text-gray-700">Member *</label>
-                <select
-                    name="member_id"
-                    required
-                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                >
-                    <option value="">Select Member</option>
-                    <?php foreach ($members as $m): ?>
-                        <option value="<?php echo $m['member_id']; ?>">
-                            <?php echo htmlspecialchars($m['full_name'] . " (" . $m['uid'] . ")"); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="relative">
+                    <input
+                        type="text"
+                        id="member_search"
+                        placeholder="Search member by name or username..."
+                        autocomplete="off"
+                        required
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
+                    <div id="member_dropdown" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                        <!-- Dropdown options will be populated by JavaScript -->
+                    </div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500" id="selected_member_info"></p>
             </div>
 
             <div class="mb-4">
@@ -193,58 +197,14 @@ include '../includes/header.php';
     </div>
 </div>
 
+<script src="../assets/js/issue-book-search.js"></script>
 <script>
-const availableBooks = <?php echo json_encode($booksAvailable); ?>;
-let bookRowIndex = 0;
-
-function createBookRow(index) {
-    const row = document.createElement('div');
-    row.className = 'flex items-start gap-2 book-row';
-    row.innerHTML = `
-        <select
-            name="book_ids[]"
-            required
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-        >
-            <option value="">Select Book</option>
-            ${availableBooks.map(b => `<option value="${b.book_id}">${escapeHtml(b.title)} - ${escapeHtml(b.isbn)}</option>`).join('')}
-        </select>
-        ${index > 0 ? `
-        <button
-            type="button"
-            onclick="this.closest('.book-row').remove(); updateBookCount();"
-            title="Remove Book"
-            class="inline-flex h-10 min-w-[42px] items-center justify-center rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-        >
-            <i data-lucide="trash-2" class="h-4 w-4"></i>
-        </button>` : ''}
-    `;
-    return row;
-}
-
-function addBookRow() {
-    const container = document.getElementById('books-container');
-    container.appendChild(createBookRow(bookRowIndex++));
-    lucide.createIcons();
-    updateBookCount();
-}
-
-function updateBookCount() {
-    const count = document.querySelectorAll('.book-row').length;
-    if (count === 0) {
-        addBookRow(); // Always have at least one row
-    }
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// Initialize with one book row
+// Initialize search functionality when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    addBookRow();
+    const members = <?php echo json_encode($members); ?>;
+    const availableBooks = <?php echo json_encode($booksAvailable); ?>;
+    
+    initIssueBookSearch(members, availableBooks);
 });
 </script>
 
