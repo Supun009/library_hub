@@ -37,9 +37,10 @@ $conditions = [];
 $params = [];
 
 if ($search) {
-    $conditions[] = "(b.title LIKE :search_title OR b.isbn LIKE :search_isbn)";
+    $conditions[] = "(b.title LIKE :search_title OR b.isbn LIKE :search_isbn OR a.name LIKE :search_author)";
     $params['search_title'] = "%$search%";
     $params['search_isbn'] = "%$search%";
+    $params['search_author'] = "%$search%";
 }
 
 if ($filter && $filter !== 'All') {
@@ -85,6 +86,9 @@ $books = $stmt->fetchAll();
 include '../includes/header.php';
 ?>
 
+<!-- Real-time Search Script -->
+<script src="/lib_system/library_system/assets/js/book-catalog-search.js"></script>
+
 <div class="mb-6 flex items-center justify-between">
     <div>
         <h1 class="mb-1 text-2xl font-semibold text-gray-900">Book Catalog</h1>
@@ -114,13 +118,12 @@ include '../includes/header.php';
                 type="text"
                 name="search"
                 value="<?php echo htmlspecialchars($search); ?>"
-                placeholder="Search by title or ISBN..."
+                placeholder="Search by title, author, or ISBN..."
                 class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
             >
         </div>
         <select
             name="category"
-            onchange="this.form.submit()"
             class="block w-full max-w-xs rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
         >
             <option value="All">All Categories</option>
