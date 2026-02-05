@@ -10,13 +10,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Existing custom stylesheet (kept for now to avoid breaking layout) -->
-    <link rel="stylesheet" href="/lib_system/library_system/assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
 
     <!-- Unpkg for Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Global Search Script -->
-    <script src="/lib_system/library_system/assets/js/global-search.js" defer></script>
+    <script src="<?php echo asset('js/global-search.js'); ?>" defer></script>
 </head>
 <body>
     <div class="wrapper">
@@ -38,7 +38,7 @@
                     <div class="user-avatar">
                         <?php echo strtoupper(substr($_SESSION['username'] ?? 'U', 0, 2)); ?>
                     </div>
-                    <a href="/lib_system/library_system/auth/logout.php" class="btn-logout" title="Logout">
+                    <a href="<?php echo authUrl('logout.php'); ?>" class="btn-logout" title="Logout">
                         <i data-lucide="log-out" style="width: 20px; height: 20px;"></i>
                     </a>
                 </div>
