@@ -13,52 +13,57 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
-    $role = $_POST['role']; // For demonstration purposes, allowing role selection
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    if (empty($username) || empty($password)) {
+    if (empty($username) || empty($email) || empty($password)) {
         $error = "All fields are required.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "Please enter a valid email address.";
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
     } else {
-        // Check if username exists
+        // Check if username or email exists
         $stmt = $pdo->prepare("SELECT user_id FROM users WHERE username = ?");
         $stmt->execute([$username]);
         if ($stmt->rowCount() > 0) {
             $error = "Username already taken.";
         } else {
-            // Register user
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $role_id = ($role === 'admin') ? 1 : 2;
+            $stmt = $pdo->prepare("SELECT member_id FROM members WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->rowCount() > 0) {
+                $error = "Email already registered.";
+            } else {
+                // Register user (always as member)
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                $role_id = 2; // Member role
 
-            try {
-                $pdo->beginTransaction();
+                try {
+                    $pdo->beginTransaction();
 
-                $stmt = $pdo->prepare("INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)");
-                $stmt->execute([$username, $hashed_password, $role_id]);
-                $user_id = $pdo->lastInsertId();
+                    $stmt = $pdo->prepare("INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)");
+                    $stmt->execute([$username, $hashed_password, $role_id]);
+                    $user_id = $pdo->lastInsertId();
 
-                // If member, create member entry stub
-                if ($role_id == 2) {
+                    // Create member entry
                     $stmt = $pdo->prepare("INSERT INTO members (user_id, full_name, email) VALUES (?, ?, ?)");
-                    // Using placeholder data since we just want a basic signup flow for now
-                    $stmt->execute([$user_id, $username, $username . '@example.com']); 
+                    $stmt->execute([$user_id, $username, $email]);
+
+                    $pdo->commit();
+                    
+                    // Auto login
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['username'] = $username;
+                    $_SESSION['role_id'] = $role_id;
+                    
+                    header("Location: /lib_system/library_system/index.php");
+                    exit();
+
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    $error = "Registration failed: " . $e->getMessage();
                 }
-
-                $pdo->commit();
-                
-                // Auto login
-                $_SESSION['user_id'] = $user_id;
-                $_SESSION['username'] = $username;
-                $_SESSION['role_id'] = $role_id;
-                
-                header("Location: /lib_system/library_system/index.php");
-                exit();
-
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                $error = "Registration failed: " . $e->getMessage();
             }
         }
     }
@@ -103,15 +108,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div>
-                <label for="role" class="mb-1 block text-sm font-medium text-gray-700">Role</label>
-                <select
-                    name="role"
-                    id="role"
+                <label for="email" class="mb-1 block text-sm font-medium text-gray-700">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    placeholder="your.email@example.com"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
-                    <option value="member">Member</option>
-                    <option value="admin">Admin (Demo)</option>
-                </select>
             </div>
 
             <div>

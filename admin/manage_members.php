@@ -62,7 +62,7 @@ $countQuery = "
     SELECT COUNT(*) as total
     FROM members m
     JOIN users u ON m.user_id = u.user_id
-    WHERE m.deleted_at IS NULL
+    WHERE 1=1
 ";
 
 // Apply status filter to count
@@ -90,7 +90,7 @@ $query = "
            (SELECT COUNT(*) FROM issues i WHERE i.member_id = m.member_id AND i.return_date IS NULL) as active_loans
     FROM members m
     JOIN users u ON m.user_id = u.user_id
-    WHERE m.deleted_at IS NULL
+    WHERE 1=1
 ";
 
 // Apply status filter

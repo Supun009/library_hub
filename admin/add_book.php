@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $title = trim($_POST['title']);
     $isbn = trim($_POST['isbn']);
     $categoryId = $_POST['category_id'] ?? '';
+    $newCategoryName = trim($_POST['new_category_name'] ?? '');
     $pubYear = $_POST['publication_year'] ?? NULL;
     
     // Author Logic - Expecting an array
@@ -26,6 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if (empty($title) || empty($isbn) || empty($categoryId) || empty($rawAuthors)) {
         $error = "Title, ISBN, Category, and at least one Author are required.";
+    } elseif ($categoryId === 'new' && empty($newCategoryName)) {
+        $error = "Please enter a name for the new category.";
+    } elseif (!empty($pubYear) && (!is_numeric($pubYear) || $pubYear < 1000 || $pubYear > date('Y') + 1)) {
+        $error = "Please enter a valid publication year (1000-" . (date('Y') + 1) . ").";
     } else {
         try {
             // Check for duplicate ISBN
@@ -36,7 +41,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } else {
                 $pdo->beginTransaction();
 
-                // 1. Get Status ID (Available)
+                // 1. Handle New Category
+                if ($categoryId === 'new') {
+                    // Check if exists
+                    $stmt = $pdo->prepare("SELECT category_id FROM categories WHERE category_name = ?");
+                    $stmt->execute([$newCategoryName]);
+                    $existingCatId = $stmt->fetchColumn();
+                    
+                    if ($existingCatId) {
+                        $categoryId = $existingCatId;
+                    } else {
+                        $stmt = $pdo->prepare("INSERT INTO categories (category_name) VALUES (?)");
+                        $stmt->execute([$newCategoryName]);
+                        $categoryId = $pdo->lastInsertId();
+                    }
+                }
+
+                // 2. Get Status ID (Available)
                 $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Available'");
                 $statusId = $stmt->fetchColumn();
                 if (!$statusId) {
@@ -171,21 +192,39 @@ include '../includes/header.php';
                     value="<?php echo htmlspecialchars($_POST['publication_year'] ?? ''); ?>"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
+                <p class="mt-1 text-xs text-gray-500">YYYY format (1000 - <?php echo date('Y') + 1; ?>)</p>
             </div>
             
             <!-- Category -->
-            <div>
+            <div class="relative">
                 <label class="mb-1 block text-sm font-medium text-gray-700">Category *</label>
-                <select
-                    name="category_id"
-                    required
-                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                >
-                    <option value="">Select Category</option>
-                    <?php foreach ($categories as $cat): ?>
-                        <option value="<?php echo $cat['category_id']; ?>"><?php echo htmlspecialchars($cat['category_name']); ?></option>
-                    <?php endforeach; ?>
-                </select>
+                
+                <!-- Search Input -->
+                <div id="category_search_container">
+                    <input type="hidden" name="category_id" id="category_id_hidden" value="<?php echo htmlspecialchars($_POST['category_id'] ?? ''); ?>" required>
+                    <input
+                        type="text"
+                        id="category_search"
+                        placeholder="Search category..."
+                        autocomplete="off"
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
+                    <div id="category_dropdown" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                        <!-- Categories will be populated here -->
+                    </div>
+                </div>
+
+                <!-- New Category Input -->
+                <div id="new_category_input_container" class="hidden items-center gap-2">
+                    <input
+                        type="text"
+                        name="new_category_name"
+                        id="new_category_name"
+                        placeholder="Enter New Category Name"
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
+                    <button type="button" id="cancel_new_category" class="text-sm text-red-600 hover:text-red-800 font-medium whitespace-nowrap">Cancel</button>
+                </div>
             </div>
         </div>
 
@@ -225,75 +264,12 @@ include '../includes/header.php';
     </form>
 </div>
 
-<!-- Author Validation Data for JS -->
+<!-- Scripts -->
 <script>
-const existingAuthors = <?php echo json_encode($authors); ?>;
-
-function createAuthorRow(index) {
-    const row = document.createElement('div');
-    row.className = 'flex items-start gap-2 author-row';
-    row.innerHTML = `
-        <div class="flex-grow">
-            <select
-                name="authors[${index}][id]"
-                required
-                onchange="toggleAuthorInput(this, ${index})"
-                class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            >
-                <option value="">Select Author</option>
-                <option value="new" style="font-weight: bold; color: #2563eb;">+ Add New Author</option>
-                ${existingAuthors.map(a => `<option value="${a.author_id}">${escapeHtml(a.name)}</option>`).join('')}
-            </select>
-            <input
-                type="text"
-                name="authors[${index}][new_name]"
-                placeholder="Enter New Author Name"
-                class="hidden mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            >
-        </div>
-        ${index > 0 ? `
-        <button
-            type="button"
-            onclick="this.closest('.author-row').remove(); lucide.createIcons();"
-            title="Remove Author"
-            class="inline-flex h-10 min-w-[42px] items-center justify-center rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-        >
-            <i data-lucide="trash-2" class="h-4 w-4"></i>
-        </button>` : ''}
-    `;
-    return row;
-}
-
-function addAuthorRow() {
-    const container = document.getElementById('authors-container');
-    const index = container.children.length;
-    container.appendChild(createAuthorRow(index));
-    lucide.createIcons();
-}
-
-function toggleAuthorInput(select, index) {
-    const input = select.nextElementSibling;
-    if (select.value === 'new') {
-        input.classList.remove('hidden');
-        input.required = true;
-        input.focus();
-    } else {
-        input.classList.add('hidden');
-        input.required = false;
-        input.value = '';
-    }
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// Initialize with one row
-document.addEventListener('DOMContentLoaded', () => {
-    addAuthorRow();
-});
+// Initialize data for external script
+window.authorsData = <?php echo json_encode($authors); ?>;
+window.categoriesData = <?php echo json_encode($categories); ?>;
 </script>
+<script src="js/add_book.js"></script>
 
 <?php include '../includes/footer.php'; ?>
