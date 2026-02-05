@@ -30,7 +30,6 @@ try {
         WHERE i.return_date IS NULL
           AND i.due_date < :threshold_date
           AND m.status = 'active'
-          AND m.deleted_at IS NULL
         GROUP BY m.member_id
     ";
     

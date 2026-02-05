@@ -126,6 +126,7 @@ include '../includes/header.php';
         <p class="text-sm text-gray-600">Register and manage library members</p>
     </div>
     <button
+        data-testid="add-member-button"
         onclick="document.getElementById('addMemberForm').classList.toggle('hidden')"
         class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
     >
@@ -135,12 +136,12 @@ include '../includes/header.php';
 </div>
 
 <?php if ($error): ?>
-    <div class="mb-4 rounded-md border border-red-200 bg-red-100 px-4 py-3 text-sm text-red-700">
+    <div data-testid="error-alert" class="mb-4 rounded-md border border-red-200 bg-red-100 px-4 py-3 text-sm text-red-700">
         <?php echo htmlspecialchars($error); ?>
     </div>
 <?php endif; ?>
 <?php if ($success): ?>
-    <div class="mb-4 rounded-md border border-green-200 bg-green-100 px-4 py-3 text-sm text-green-700">
+    <div data-testid="success-alert" class="mb-4 rounded-md border border-green-200 bg-green-100 px-4 py-3 text-sm text-green-700">
         <?php echo htmlspecialchars($success); ?>
     </div>
 <?php endif; ?>
@@ -156,6 +157,7 @@ include '../includes/header.php';
                 <input
                     type="text"
                     name="full_name"
+                    data-testid="input-full-name"
                     required
                     placeholder="e.g. John Doe"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
@@ -166,6 +168,7 @@ include '../includes/header.php';
                 <input
                     type="email"
                     name="email"
+                    data-testid="input-email"
                     required
                     placeholder="john@example.com"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
@@ -176,6 +179,7 @@ include '../includes/header.php';
                 <input
                     type="text"
                     name="username"
+                    data-testid="input-username"
                     required
                     placeholder="e.g. STU001"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
@@ -186,6 +190,7 @@ include '../includes/header.php';
                 <input
                     type="password"
                     name="password"
+                    data-testid="input-password"
                     required
                     placeholder="Default password"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
@@ -195,6 +200,7 @@ include '../includes/header.php';
         <div class="flex gap-2">
             <button
                 type="submit"
+                data-testid="submit-register-member"
                 class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
             >
                 Register Member
@@ -219,6 +225,7 @@ include '../includes/header.php';
             <input
                 type="text"
                 name="search"
+                data-testid="search-members"
                 value="<?php echo htmlspecialchars($search); ?>"
                 placeholder="Search members by name, email, or ID..."
                 class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"

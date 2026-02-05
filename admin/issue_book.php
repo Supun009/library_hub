@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } else {
         try {
             // Check if member is active
-            $stmt = $pdo->prepare("SELECT status, full_name FROM members WHERE member_id = ? AND deleted_at IS NULL");
+            $stmt = $pdo->prepare("SELECT status, full_name FROM members WHERE member_id = ?");
             $stmt->execute([$memberId]);
             $member = $stmt->fetch();
             
@@ -89,7 +89,7 @@ $members = $pdo->query("
            (SELECT username FROM users WHERE users.user_id = m.user_id) as uid,
            (SELECT COUNT(*) FROM issues WHERE member_id = m.member_id AND return_date IS NULL) as issued_books_count
     FROM members m
-    WHERE m.deleted_at IS NULL AND m.status = 'active'
+    WHERE m.status = 'active'
     ORDER BY m.full_name
 ")->fetchAll();
 

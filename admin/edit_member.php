@@ -75,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Cannot delete member. They have $issuedCount unreturned book(s). Please ensure all books are returned first.";
         } else {
             try {
-                // Soft delete
-                $stmt = $pdo->prepare("UPDATE members SET deleted_at = CURRENT_TIMESTAMP WHERE member_id = ?");
+                // Delete the user (member will be cascade deleted due to ON DELETE CASCADE)
+                $stmt = $pdo->prepare("DELETE FROM users WHERE user_id = (SELECT user_id FROM members WHERE member_id = ?)");
                 $stmt->execute([$memberId]);
                 header("Location: manage_members.php?msg=member_deleted");
                 exit;
@@ -94,7 +94,7 @@ $stmt = $pdo->prepare("
            (SELECT COUNT(*) FROM issues WHERE member_id = m.member_id AND return_date IS NULL AND due_date < CURDATE()) as overdue_books_count
     FROM members m 
     JOIN users u ON m.user_id = u.user_id 
-    WHERE m.member_id = ? AND m.deleted_at IS NULL
+    WHERE m.member_id = ?
 ");
 $stmt->execute([$memberId]);
 $member = $stmt->fetch();
@@ -299,7 +299,7 @@ include '../includes/header.php';
         <!-- Delete Card -->
         <div class="rounded border border-red-200 bg-white p-6 shadow-sm">
             <h2 class="mb-2 text-lg font-semibold text-red-700">Delete Member</h2>
-            <p class="mb-4 text-sm text-gray-500">This will soft-delete the member. They will no longer appear in active lists.</p>
+            <p class="mb-4 text-sm text-gray-500">This will permanently delete the member. This action cannot be undone.</p>
             
             <?php if ($member['issued_books_count'] > 0): ?>
                 <!-- Disabled delete button -->

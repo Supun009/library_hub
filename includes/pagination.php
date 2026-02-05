@@ -9,6 +9,19 @@
  * @return void Outputs the pagination HTML
  */
 function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams = []) {
+    // Ensure all numeric parameters are integers to prevent type errors
+    $currentPage = (int) $currentPage;
+    $totalItems = (int) $totalItems;
+    $itemsPerPage = (int) $itemsPerPage;
+    
+    // Validate inputs
+    if ($itemsPerPage <= 0) {
+        $itemsPerPage = 10; // Default fallback
+    }
+    if ($currentPage < 1) {
+        $currentPage = 1;
+    }
+    
     $totalPages = ceil($totalItems / $itemsPerPage);
     
     // Don't show pagination if only one page or no items
@@ -28,6 +41,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
     $range = 2; // Show 2 pages on each side of current page
     $startPage = max(1, $currentPage - $range);
     $endPage = min($totalPages, $currentPage + $range);
+    
     
     ?>
     <div class="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-md">

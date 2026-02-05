@@ -1,7 +1,7 @@
 <!-- includes/sidebar.php -->
 <?php
 // Define page groups for active state highlighting
-$currentPage = basename($_SERVER['PHP_SELF']);
+$activePage = basename($_SERVER['PHP_SELF']);
 
 // Map nested pages to their parent menu items
 $pageGroups = [
@@ -18,8 +18,8 @@ $pageGroups = [
 ];
 
 // Helper function to check if current page belongs to a group
-function isActiveGroup($group, $currentPage, $pageGroups) {
-    return isset($pageGroups[$group]) && in_array($currentPage, $pageGroups[$group]);
+function isActiveGroup($group, $activePage, $pageGroups) {
+    return isset($pageGroups[$group]) && in_array($activePage, $pageGroups[$group]);
 }
 ?>
 <aside class="sidebar">
@@ -29,56 +29,56 @@ function isActiveGroup($group, $currentPage, $pageGroups) {
     <ul class="sidebar-nav">
         <?php if (hasRole('admin')): ?>
             <li>
-                <a href="<?php echo adminUrl('dashboard.php'); ?>" class="<?php echo isActiveGroup('dashboard', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo adminUrl('dashboard.php'); ?>" class="<?php echo isActiveGroup('dashboard', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="layout-dashboard"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo adminUrl('manage_books.php'); ?>" class="<?php echo isActiveGroup('books', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo adminUrl('manage_books.php'); ?>" class="<?php echo isActiveGroup('books', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="book-open"></i>
                     <span>Book Catalog</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo adminUrl('search.php'); ?>" class="<?php echo isActiveGroup('search', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo adminUrl('search.php'); ?>" class="<?php echo isActiveGroup('search', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="search"></i>
                     <span>Advanced Search</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo adminUrl('manage_members.php'); ?>" class="<?php echo isActiveGroup('members', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo adminUrl('manage_members.php'); ?>" class="<?php echo isActiveGroup('members', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="users"></i>
                     <span>Member Management</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo adminUrl('transactions.php'); ?>" class="<?php echo isActiveGroup('transactions', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo adminUrl('transactions.php'); ?>" class="<?php echo isActiveGroup('transactions', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="arrow-left-right"></i>
                     <span>Transactions</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo adminUrl('profile.php'); ?>" class="<?php echo isActiveGroup('profile', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo adminUrl('profile.php'); ?>" class="<?php echo isActiveGroup('profile', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="settings"></i>
                     <span>Profile & Settings</span>
                 </a>
             </li>
         <?php elseif (hasRole('member')): ?>
             <li>
-                <a href="<?php echo memberUrl('index.php'); ?>" class="<?php echo isActiveGroup('browse', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo memberUrl('index.php'); ?>" class="<?php echo isActiveGroup('browse', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="book-open"></i>
                     <span>Browse Catalog</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo memberUrl('search.php'); ?>" class="<?php echo isActiveGroup('member_search', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo memberUrl('search.php'); ?>" class="<?php echo isActiveGroup('member_search', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="search"></i>
                     <span>Advanced Search</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo memberUrl('my_loans.php'); ?>" class="<?php echo isActiveGroup('loans', $currentPage, $pageGroups) ? 'active' : ''; ?>">
+                <a href="<?php echo memberUrl('my_loans.php'); ?>" class="<?php echo isActiveGroup('loans', $activePage, $pageGroups) ? 'active' : ''; ?>">
                     <i data-lucide="history"></i>
                     <span>My Loans</span>
                 </a>
