@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS categories (
 );
 
 -- 6. Status Table (Must be created before books)
-CREATE TABLE IF NOT EXISTS book_status (
+CREATE TABLE IF NOT EXISTS status (
     status_id INT AUTO_INCREMENT PRIMARY KEY,
     status_name VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS book_status (
 );
 
 -- Seed Statuses
-INSERT INTO book_status (status_name) VALUES ('Available'), ('Issued'), ('Lost'), ('Damaged')
+INSERT INTO status (status_name) VALUES ('Available'), ('Issued'), ('Lost'), ('Damaged')
 ON DUPLICATE KEY UPDATE status_name=status_name;
 
 -- 7. Books Table
@@ -59,11 +59,11 @@ CREATE TABLE IF NOT EXISTS books (
     isbn VARCHAR(20) UNIQUE,
     publication_year INT(4) DEFAULT NULL, -- Added from migration
     category_id INT,
-    book_status_id INT,
+    status_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
-    FOREIGN KEY (book_status_id) REFERENCES book_status(book_status_id) ON DELETE RESTRICT
+    FOREIGN KEY (status_id) REFERENCES status(status_id) ON DELETE RESTRICT
 );
 
 -- 8. Book_Authors Junction Table (Many-to-Many Relationship)
@@ -116,5 +116,5 @@ CREATE TABLE IF NOT EXISTS settings (
 -- Seed Default Settings
 INSERT INTO settings (setting_key, setting_value) VALUES 
     ('fine_per_day', '0.50'),
-    ('loan_period_days', '14'),
+    ('loan_period_days', '14')
 ON DUPLICATE KEY UPDATE setting_value=setting_value;
