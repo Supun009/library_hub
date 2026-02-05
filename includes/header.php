@@ -14,6 +14,9 @@
 
     <!-- Unpkg for Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Global Search Script -->
+    <script src="/lib_system/library_system/assets/js/global-search.js" defer></script>
 </head>
 <body>
     <div class="wrapper">
@@ -24,7 +27,7 @@
                 <!-- Global Search -->
                 <div class="header-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search books, members, or transactions...">
+                    <input type="text" placeholder="Search books, authors, or ISBN...">
                 </div>
 
                 <div class="user-menu">

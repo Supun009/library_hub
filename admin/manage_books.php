@@ -37,14 +37,14 @@ $conditions = [];
 $params = [];
 
 if ($search) {
-    $conditions[] = "(b.title LIKE ? OR b.isbn LIKE ?)";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
+    $conditions[] = "(b.title LIKE :search_title OR b.isbn LIKE :search_isbn)";
+    $params['search_title'] = "%$search%";
+    $params['search_isbn'] = "%$search%";
 }
 
 if ($filter && $filter !== 'All') {
-    $conditions[] = "c.category_name = ?";
-    $params[] = $filter;
+    $conditions[] = "c.category_name = :category";
+    $params['category'] = $filter;
 }
 
 $whereClause = '';
@@ -70,14 +70,9 @@ $query = "
 
 $stmt = $pdo->prepare($query);
 
-// Bind search/filter parameters
-$paramIndex = 1;
-if ($search) {
-    $stmt->bindValue($paramIndex++, "%$search%", PDO::PARAM_STR);
-    $stmt->bindValue($paramIndex++, "%$search%", PDO::PARAM_STR);
-}
-if ($filter && $filter !== 'All') {
-    $stmt->bindValue($paramIndex++, $filter, PDO::PARAM_STR);
+// Bind all parameters (search/filter + pagination)
+foreach ($params as $key => $value) {
+    $stmt->bindValue(":$key", $value, PDO::PARAM_STR);
 }
 
 // Bind pagination parameters
