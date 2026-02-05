@@ -52,10 +52,10 @@ $conditions = [];
 $params = [];
 
 if ($search) {
-    $conditions[] = "(m.full_name LIKE ? OR b.title LIKE ? OR i.issue_id = ?)";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
-    $params[] = $search;
+    $conditions[] = "(m.full_name LIKE :search_name OR b.title LIKE :search_title OR i.issue_id = :search_id)";
+    $params['search_name'] = "%$search%";
+    $params['search_title'] = "%$search%";
+    $params['search_id'] = $search;
 }
 
 // Status Filtering Logic
@@ -91,12 +91,9 @@ $query = "
 
 $stmt = $pdo->prepare($query);
 
-// Bind search parameters if they exist
-$paramIndex = 1;
-if ($search) {
-    $stmt->bindValue($paramIndex++, "%$search%", PDO::PARAM_STR);
-    $stmt->bindValue($paramIndex++, "%$search%", PDO::PARAM_STR);
-    $stmt->bindValue($paramIndex++, $search, PDO::PARAM_INT);
+// Bind all parameters using named parameters
+foreach ($params as $key => $value) {
+    $stmt->bindValue(":$key", $value);
 }
 
 // Bind pagination parameters as integers

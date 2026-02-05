@@ -19,45 +19,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $error = "Please select a member and at least one book.";
     } else {
         try {
-            // Get status IDs
-            $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Available'");
-            $availableStatusId = $stmt->fetchColumn();
-
-            $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Issued'");
-            $issuedStatusId = $stmt->fetchColumn();
-
-            // Validate all books are available
-            $unavailableBooks = [];
-            foreach ($bookIds as $bookId) {
-                $stmt = $pdo->prepare("SELECT title, status_id FROM books WHERE book_id = ?");
-                $stmt->execute([$bookId]);
-                $book = $stmt->fetch();
-                
-                if (!$book || $book['status_id'] != $availableStatusId) {
-                    $unavailableBooks[] = $book ? $book['title'] : "Book ID: $bookId";
-                }
-            }
-
-            if (!empty($unavailableBooks)) {
-                $error = "The following books are not available: " . implode(", ", $unavailableBooks);
+            // Check if member is active
+            $stmt = $pdo->prepare("SELECT status, full_name FROM members WHERE member_id = ? AND deleted_at IS NULL");
+            $stmt->execute([$memberId]);
+            $member = $stmt->fetch();
+            
+            if (!$member) {
+                $error = "Member not found.";
+            } elseif ($member['status'] === 'suspended') {
+                $error = "Cannot issue books. Member account is suspended due to long overdue books. Please return overdue books and unsuspend the account first.";
+            } elseif ($member['status'] === 'inactive') {
+                $error = "Cannot issue books. Member account is inactive. Please activate the account first.";
+            } elseif ($member['status'] !== 'active') {
+                $error = "Cannot issue books. Member account is not active.";
             } else {
-                $pdo->beginTransaction();
-                
-                // Issue all books
+                // Get status IDs
+                $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Available'");
+                $availableStatusId = $stmt->fetchColumn();
+
+                $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Issued'");
+                $issuedStatusId = $stmt->fetchColumn();
+
+                // Validate all books are available
+                $unavailableBooks = [];
                 foreach ($bookIds as $bookId) {
-                    // 1. Insert Issue Record
-                    $stmt = $pdo->prepare("INSERT INTO issues (book_id, member_id, issue_date, due_date) VALUES (?, ?, CURDATE(), ?)");
-                    $stmt->execute([$bookId, $memberId, $dueDate]);
+                    $stmt = $pdo->prepare("SELECT title, status_id FROM books WHERE book_id = ?");
+                    $stmt->execute([$bookId]);
+                    $book = $stmt->fetch();
                     
-                    // 2. Update Book Status to Issued
-                    $stmt = $pdo->prepare("UPDATE books SET status_id = ? WHERE book_id = ?");
-                    $stmt->execute([$issuedStatusId, $bookId]);
+                    if (!$book || $book['status_id'] != $availableStatusId) {
+                        $unavailableBooks[] = $book ? $book['title'] : "Book ID: $bookId";
+                    }
                 }
-                
-                $pdo->commit();
-                $bookCount = count($bookIds);
-                header("Location: transactions.php?msg=issued&count=$bookCount");
-                exit;
+
+                if (!empty($unavailableBooks)) {
+                    $error = "The following books are not available: " . implode(", ", $unavailableBooks);
+                } else {
+                    $pdo->beginTransaction();
+                    
+                    // Issue all books
+                    foreach ($bookIds as $bookId) {
+                        // 1. Insert Issue Record
+                        $stmt = $pdo->prepare("INSERT INTO issues (book_id, member_id, issue_date, due_date) VALUES (?, ?, CURDATE(), ?)");
+                        $stmt->execute([$bookId, $memberId, $dueDate]);
+                        
+                        // 2. Update Book Status to Issued
+                        $stmt = $pdo->prepare("UPDATE books SET status_id = ? WHERE book_id = ?");
+                        $stmt->execute([$issuedStatusId, $bookId]);
+                    }
+                    
+                    $pdo->commit();
+                    $bookCount = count($bookIds);
+                    header("Location: transactions.php?msg=issued&count=$bookCount");
+                    exit;
+                }
             }
         } catch (PDOException $e) {
             if ($pdo->inTransaction()) {
@@ -68,8 +83,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Fetch Lists
-$members = $pdo->query("SELECT member_id, full_name, (SELECT username FROM users WHERE users.user_id = members.user_id) as uid FROM members WHERE deleted_at IS NULL AND status = 'active'")->fetchAll();
+// Fetch Lists - Only active members
+$members = $pdo->query("
+    SELECT m.member_id, m.full_name, m.status,
+           (SELECT username FROM users WHERE users.user_id = m.user_id) as uid,
+           (SELECT COUNT(*) FROM issues WHERE member_id = m.member_id AND return_date IS NULL) as issued_books_count
+    FROM members m
+    WHERE m.deleted_at IS NULL AND m.status = 'active'
+    ORDER BY m.full_name
+")->fetchAll();
+
 $booksAvailable = $pdo->query("SELECT book_id, title, isbn FROM books WHERE status_id = (SELECT status_id FROM status WHERE status_name = 'Available')")->fetchAll();
 
 include '../includes/header.php';
