@@ -111,6 +111,20 @@ if ($prefillId) {
 include '../includes/header.php';
 ?>
 
+<div class="mb-6 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-900 mb-1">Issue Book</h1>
+        <p class="text-sm text-gray-600">Issue a book to a member</p>
+    </div>
+    <a
+        href="transactions.php"
+        class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+    >
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back to Transactions
+    </a>
+</div>
+
 <div class="mb-6">
     <h1 class="text-2xl text-gray-900 mb-1">Return Book</h1>
     <p class="text-gray-600">Process book returns and fines</p>
