@@ -164,32 +164,16 @@ include __DIR__ . '/../includes/header.php';
             <!-- Category -->
             <div class="relative">
                 <label class="mb-1 block text-sm font-medium text-gray-700">Category *</label>
-                
-                <!-- Search Input -->
-                <div id="category_search_container">
-                    <input type="hidden" name="category_id" id="category_id_hidden" value="<?php echo htmlspecialchars($_POST['category_id'] ?? ''); ?>" required>
-                    <input
-                        type="text"
-                        id="category_search"
-                        placeholder="Search category..."
-                        autocomplete="off"
-                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    >
-                    <div id="category_dropdown" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
-                        <!-- Categories will be populated here -->
-                    </div>
-                </div>
-
-                <!-- New Category Input -->
-                <div id="new_category_input_container" class="hidden items-center gap-2">
-                    <input
-                        type="text"
-                        name="new_category_name"
-                        id="new_category_name"
-                        placeholder="Enter New Category Name"
-                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    >
-                    <button type="button" id="cancel_new_category" class="text-sm text-red-600 hover:text-red-800 font-medium whitespace-nowrap">Cancel</button>
+                <input type="hidden" name="category_id" id="category_id_hidden" value="<?php echo htmlspecialchars($_POST['category_id'] ?? ''); ?>" required>
+                <input
+                    type="text"
+                    id="category_search"
+                    placeholder="Search category..."
+                    autocomplete="off"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
+                <div id="category_dropdown" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                    <!-- Categories will be populated here -->
                 </div>
             </div>
         </div>
@@ -203,8 +187,8 @@ include __DIR__ . '/../includes/header.php';
                     onclick="addAuthorRow()"
                     class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
                 >
-                    <i data-lucide="plus-circle" class="h-4 w-4"></i>
-                    Add Another Author
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Add Author
                 </button>
             </div>
 
