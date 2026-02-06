@@ -2,6 +2,8 @@
 // includes/auth_middleware.php
 session_start();
 
+require_once __DIR__ . '/url_helper.php';
+
 // Function to check if user is logged in
 function isLoggedIn() {
     return isset($_SESSION['user_id']);
@@ -10,8 +12,7 @@ function isLoggedIn() {
 // Function to enforce login
 function requireLogin() {
     if (!isLoggedIn()) {
-        header("Location: /lib_system/library_system/auth/login.php");
-        exit();
+        redirect(authUrl('login.php'));
     }
 }
 
@@ -35,11 +36,10 @@ function requireRole($role) {
     if (!hasRole($role)) {
         // Redirect to their appropriate dashboard if they have the wrong role
         if (hasRole('admin')) {
-            header("Location: /lib_system/library_system/admin/dashboard.php");
+            redirect(adminUrl('dashboard.php'));
         } else {
-            header("Location: /lib_system/library_system/member/index.php");
+            redirect(memberUrl('index.php'));
         }
-        exit();
     }
 }
 ?>

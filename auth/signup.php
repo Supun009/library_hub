@@ -6,8 +6,7 @@ require_once '../includes/auth_middleware.php';
 require_once '../includes/validation_helper.php';
 
 if (isLoggedIn()) {
-    header("Location: /lib_system/library_system/index.php");
-    exit();
+    redirect(url('index.php'));
 }
 
 $error = '';
@@ -69,8 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['username'] = $username;
                     $_SESSION['role_id'] = $role_id;
                     
-                    header("Location: /lib_system/library_system/index.php");
-                    exit();
+                    redirect(url('index.php'));
 
                 } catch (Exception $e) {
                     $pdo->rollBack();
@@ -92,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Existing custom stylesheet (kept for now to avoid breaking layout) -->
-    <link rel="stylesheet" href="/lib_system/library_system/assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
 </head>
 <body class="auth-body">
     <div class="auth-container">

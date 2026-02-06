@@ -6,9 +6,8 @@ require_once '../includes/validation_helper.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
-    if (hasRole('admin')) header("Location: /lib_system/library_system/admin/dashboard.php");
-    else header("Location: /lib_system/library_system/member/index.php");
-    exit();
+    if (hasRole('admin')) redirect(adminUrl('dashboard.php'));
+    else redirect(memberUrl('index.php'));
 }
 
 $error = '';
@@ -31,11 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role_id'] = $user['role_id'];
 
             if ($user['role_id'] == 1) { // Admin
-                header("Location: /lib_system/library_system/admin/dashboard.php");
+                redirect(adminUrl('dashboard.php'));
             } else { // Member
-                header("Location: /lib_system/library_system/member/index.php");
+                redirect(memberUrl('index.php'));
             }
-            exit();
         } else {
             $error = "Invalid credentials.";
         }
@@ -53,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Existing custom stylesheet (kept for now to avoid breaking layout) -->
-    <link rel="stylesheet" href="/lib_system/library_system/assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
 </head>
 <body class="auth-body">
     <div class="auth-container">

@@ -1,7 +1,7 @@
 <?php
 // auth/logout.php
+require_once '../includes/url_helper.php';
 session_start();
 session_destroy();
-header("Location: /lib_system/library_system/auth/login.php");
-exit();
+redirect(authUrl('login.php'));
 ?>
