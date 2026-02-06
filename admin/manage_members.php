@@ -288,12 +288,22 @@ include __DIR__ . '/../includes/header.php';
                                 </span>
                             </td>
                             <td>
-                                <a
-                                    href="<?php echo url('admin/members/edit?id=' . $member['member_id']); ?>"
-                                    class="inline-flex items-center justify-center rounded-md border border-indigo-200 bg-white px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
-                                >
-                                    <i data-lucide="edit" class="h-4 w-4"></i>
-                                </a>
+                                <div class="flex items-center gap-2">
+                                    <a
+                                        href="<?php echo url('admin/members/history?id=' . $member['member_id']); ?>"
+                                        class="inline-flex items-center justify-center rounded-md border border-blue-200 bg-white px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                                        title="View Issue History"
+                                    >
+                                        <i data-lucide="eye" class="h-4 w-4"></i>
+                                    </a>
+                                    <a
+                                        href="<?php echo url('admin/members/edit?id=' . $member['member_id']); ?>"
+                                        class="inline-flex items-center justify-center rounded-md border border-indigo-200 bg-white px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                        title="Edit Member"
+                                    >
+                                        <i data-lucide="edit" class="h-4 w-4"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

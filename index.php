@@ -77,6 +77,11 @@ $router->post('/admin/categories', function() { require __DIR__ . '/admin/manage
 $router->get('/admin/authors', function() { require __DIR__ . '/admin/manage_authors.php'; });
 $router->post('/admin/authors', function() { require __DIR__ . '/admin/manage_authors.php'; });
 
+// Admin Member Management Routes
+$router->get('/admin/members/edit', function() { require __DIR__ . '/admin/edit_member.php'; });
+$router->post('/admin/members/edit', function() { require __DIR__ . '/admin/edit_member.php'; });
+$router->get('/admin/members/history', function() { require __DIR__ . '/admin/member_history.php'; });
+
 // Member Routes
 $router->get('/member', function() { require __DIR__ . '/member/index.php'; });
 $router->get('/member/loans', function() { require __DIR__ . '/member/my_loans.php'; });
