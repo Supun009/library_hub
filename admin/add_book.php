@@ -66,8 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
 
                 // 2. Insert Book
-                $stmt = $pdo->prepare("INSERT INTO books (title, isbn, category_id, status_id, publication_year) VALUES (?, ?, ?, ?, ?)");
-                $stmt->execute([$title, $isbn, $categoryId, $statusId, $pubYear ?: NULL]);
+                $totalCopies = (int)($_POST['total_copies'] ?? 1);
+                // Ensure at least 1 copy
+                if ($totalCopies < 1) $totalCopies = 1;
+                
+                $stmt = $pdo->prepare("INSERT INTO books (title, isbn, category_id, status_id, publication_year, total_copies, available_copies) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$title, $isbn, $categoryId, $statusId, $pubYear ?: NULL, $totalCopies, $totalCopies]);
                 $bookId = $pdo->lastInsertId();
 
                 // 3. Handle Authors
@@ -193,6 +197,19 @@ include '../includes/header.php';
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
                 <p class="mt-1 text-xs text-gray-500">YYYY format (1000 - <?php echo date('Y') + 1; ?>)</p>
+            </div>
+
+            <!-- Stock / Copies -->
+            <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Number of Copies *</label>
+                <input
+                    type="number"
+                    name="total_copies"
+                    required
+                    min="1"
+                    value="<?php echo htmlspecialchars($_POST['total_copies'] ?? '1'); ?>"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             
             <!-- Category -->

@@ -46,8 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $stmt->execute([$issueId]);
                     $bookId = $stmt->fetchColumn();
                     
-                    // 3. Update Book Status to Available
-                    $stmt = $pdo->prepare("UPDATE books SET status_id = (SELECT status_id FROM status WHERE status_name = 'Available') WHERE book_id = ?");
+                    // 3. Increment Available Copies and Set Status to Available
+                    // Since we are returning a book, at least one copy is now available.
+                    $stmt = $pdo->prepare("UPDATE books SET available_copies = available_copies + 1, status_id = (SELECT status_id FROM status WHERE status_name = 'Available') WHERE book_id = ?");
                     $stmt->execute([$bookId]);
                 }
                 

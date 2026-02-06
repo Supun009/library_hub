@@ -43,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 // Validate all books are available
                 $unavailableBooks = [];
                 foreach ($bookIds as $bookId) {
-                    $stmt = $pdo->prepare("SELECT title, status_id FROM books WHERE book_id = ?");
+                    $stmt = $pdo->prepare("SELECT title, available_copies FROM books WHERE book_id = ?");
                     $stmt->execute([$bookId]);
                     $book = $stmt->fetch();
                     
-                    if (!$book || $book['status_id'] != $availableStatusId) {
+                    if (!$book || $book['available_copies'] < 1) {
                         $unavailableBooks[] = $book ? $book['title'] : "Book ID: $bookId";
                     }
                 }
@@ -63,8 +63,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $stmt = $pdo->prepare("INSERT INTO issues (book_id, member_id, issue_date, due_date) VALUES (?, ?, CURDATE(), ?)");
                         $stmt->execute([$bookId, $memberId, $dueDate]);
                         
-                        // 2. Update Book Status to Issued
-                        $stmt = $pdo->prepare("UPDATE books SET status_id = ? WHERE book_id = ?");
+                        // 2. Decrement Available Copies
+                        $stmt = $pdo->prepare("UPDATE books SET available_copies = available_copies - 1 WHERE book_id = ?");
+                        $stmt->execute([$bookId]);
+
+                        // 3. Update Status if Out of Stock
+                        // We check if available_copies is 0 *after* the decrement.
+                        // However, simpler to just set status based on the new value.
+                        // Or better: UPDATE books SET status_id = CASE WHEN available_copies = 0 THEN ? ELSE status_id END WHERE book_id = ?
+                        $stmt = $pdo->prepare("UPDATE books SET status_id = ? WHERE book_id = ? AND available_copies = 0");
                         $stmt->execute([$issuedStatusId, $bookId]);
                     }
                     

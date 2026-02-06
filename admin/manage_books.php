@@ -61,7 +61,7 @@ $totalItems = $countStmt->fetch()['total'];
 
 // Fetch books with pagination
 $query = "
-    SELECT b.book_id, b.title, b.isbn, c.category_name, s.status_name,
+    SELECT b.book_id, b.title, b.isbn, b.total_copies, b.available_copies, c.category_name, s.status_name,
            GROUP_CONCAT(a.name SEPARATOR ', ') as authors
     " . $baseQuery . $whereClause . "
     GROUP BY b.book_id 
@@ -156,27 +156,30 @@ include '../includes/header.php';
                 <p class="mb-2 text-sm italic text-gray-600">
                     <?php echo htmlspecialchars($book['authors']); ?>
                 </p>
-                <p class="text-xs font-mono text-gray-400">
-                    ISBN: <?php echo htmlspecialchars($book['isbn']); ?>
-                </p>
+                <div class="flex justify-between items-center text-xs text-gray-500 mb-2">
+                    <span class="font-mono">ISBN: <?php echo htmlspecialchars($book['isbn']); ?></span>
+                    <span class="font-semibold <?php echo $book['available_copies'] > 0 ? 'text-green-600' : 'text-red-600'; ?>">
+                        Stock: <?php echo $book['available_copies'] . '/' . $book['total_copies']; ?>
+                    </span>
+                </div>
             </div>
             
             <div class="mt-6 mb-4 flex items-center justify-between">
                 <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                     <?php echo htmlspecialchars($book['category_name']); ?>
                 </span>
-                <span class="rounded-full px-2.5 py-0.5 text-xs font-medium <?php echo $book['status_name'] === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
-                    <?php echo htmlspecialchars($book['status_name']); ?>
+                <span class="rounded-full px-2.5 py-0.5 text-xs font-medium <?php echo $book['available_copies'] > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
+                    <?php echo $book['available_copies'] > 0 ? 'In Stock' : 'Out of Stock'; ?>
                 </span>
             </div>
             
             <button
-                class="inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors <?php echo $book['status_name'] === 'Available'
+                class="inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors <?php echo $book['available_copies'] > 0
                     ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                     : 'cursor-not-allowed bg-gray-100 text-gray-400'; ?>"
-                <?php echo $book['status_name'] === 'Available' ? '' : 'disabled'; ?>
+                <?php echo $book['available_copies'] > 0 ? '' : 'disabled'; ?>
             >
-                <?php echo $book['status_name'] === 'Available' ? $book['status_name'] : 'Not Available'; ?>
+                <?php echo $book['available_copies'] > 0 ? 'Available (' . $book['available_copies'] . ')' : 'Out of Stock'; ?>
             </button>
             
         </div>
