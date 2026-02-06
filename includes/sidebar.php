@@ -52,15 +52,28 @@ function isActive($pattern, $currentRoute) {
                 </a>
             </li>
             <li>
-                <a href="<?php echo url('admin/members'); ?>" class="<?php echo isActive('/admin/members', $currentRoute) ? 'active' : ''; ?>">
-                    <i data-lucide="users"></i>
-                    <span>Member Management</span>
+                <a href="<?php echo url('admin/categories'); ?>" class="<?php echo isActive('/admin/categories', $currentRoute) ? 'active' : ''; ?>">
+                    <i data-lucide="folder"></i>
+                    <span>Categories</span>
                 </a>
             </li>
+            <li>
+                <a href="<?php echo url('admin/authors'); ?>" class="<?php echo isActive('/admin/authors', $currentRoute) ? 'active' : ''; ?>">
+                    <i data-lucide="user-pen"></i>
+                    <span>Authors</span>
+                </a>
+            </li>
+            
             <li>
                 <a href="<?php echo url('admin/transactions'); ?>" class="<?php echo isActive('/admin/transactions', $currentRoute) || isActive('/admin/issue', $currentRoute) || isActive('/admin/return', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="arrow-left-right"></i>
                     <span>Transactions</span>
+                </a>
+            </li>
+            <li>
+                <a href="<?php echo url('admin/members'); ?>" class="<?php echo isActive('/admin/members', $currentRoute) ? 'active' : ''; ?>">
+                    <i data-lucide="users"></i>
+                    <span>Member Management</span>
                 </a>
             </li>
             <li>

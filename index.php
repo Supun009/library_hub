@@ -66,6 +66,17 @@ $router->get('/admin/search', function() { require __DIR__ . '/admin/search.php'
 $router->get('/admin/profile', function() { require __DIR__ . '/admin/profile.php'; });
 $router->post('/admin/profile', function() { require __DIR__ . '/admin/profile.php'; });
 
+// AJAX Routes
+$router->post('/admin/ajax/add-author', function() { require __DIR__ . '/admin/ajax_add_author.php'; });
+$router->post('/admin/ajax/add-category', function() { require __DIR__ . '/admin/ajax_add_category.php'; });
+
+// Categories and Authors Management
+$router->get('/admin/categories', function() { require __DIR__ . '/admin/manage_categories.php'; });
+$router->post('/admin/categories', function() { require __DIR__ . '/admin/manage_categories.php'; });
+
+$router->get('/admin/authors', function() { require __DIR__ . '/admin/manage_authors.php'; });
+$router->post('/admin/authors', function() { require __DIR__ . '/admin/manage_authors.php'; });
+
 // Member Routes
 $router->get('/member', function() { require __DIR__ . '/member/index.php'; });
 $router->get('/member/loans', function() { require __DIR__ . '/member/my_loans.php'; });

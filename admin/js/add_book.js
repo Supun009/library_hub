@@ -75,17 +75,57 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // New Category Click
+    // New Category Click - Use AJAX to add category immediately
     const newOption = categoryDropdown.querySelector(".new-category-option");
     if (newOption) {
       newOption.addEventListener("click", function () {
-        categoryIdHidden.value = "new";
-        categorySearchContainer.classList.add("hidden");
-        newCategoryInputContainer.classList.remove("hidden");
-        newCategoryInputContainer.classList.add("flex");
-        newCategoryNameInput.required = true;
-        newCategoryNameInput.focus();
-        categoryDropdown.classList.add("hidden");
+        const categoryName = prompt("Enter new category name:");
+        if (!categoryName || categoryName.trim() === "") return;
+
+        // Show loading state
+        categorySearch.value = "Adding category...";
+        categorySearch.disabled = true;
+
+        // AJAX call to add category
+        fetch(
+          window.location.origin +
+            "/lib_system/library_system/admin/ajax/add-category",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: "category_name=" + encodeURIComponent(categoryName.trim()),
+          },
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Add to global categories data
+              window.categoriesData.push({
+                category_id: data.category.category_id,
+                category_name: data.category.category_name,
+              });
+
+              // Set the value
+              categorySearch.value = data.category.category_name;
+              categoryIdHidden.value = data.category.category_id;
+              categoryDropdown.classList.add("hidden");
+              categorySearch.disabled = false;
+
+              // Show success message
+              alert(data.message);
+            } else {
+              alert("Error: " + data.message);
+              categorySearch.value = "";
+              categorySearch.disabled = false;
+            }
+          })
+          .catch((error) => {
+            alert("Error adding category: " + error.message);
+            categorySearch.value = "";
+            categorySearch.disabled = false;
+          });
       });
     }
   });
@@ -124,7 +164,7 @@ function createAuthorRow(index) {
         <div class="flex-grow">
             <!-- Searchable Author Input -->
             <div class="relative author-search-container">
-                <input type="hidden" name="authors[${index}][id]" class="author-id-hidden" required>
+                <input type="hidden" name="author_ids[]" class="author-id-hidden" required>
                 <input
                     type="text"
                     class="author-search block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
@@ -133,19 +173,6 @@ function createAuthorRow(index) {
                 >
                 <!-- Dropdown -->
                 <div class="author-dropdown absolute z-20 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto"></div>
-            </div>
-
-            <!-- New Author Name Input (Hidden by default) -->
-            <div class="new-author-input hidden mt-2">
-                <div class="flex items-center gap-2">
-                    <input
-                        type="text"
-                        name="authors[${index}][new_name]"
-                        placeholder="Enter New Author Name"
-                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    >
-                    <button type="button" class="cancel-new-author text-sm text-red-600 hover:text-red-800 font-medium">Cancel</button>
-                </div>
             </div>
         </div>
         ${
@@ -167,10 +194,6 @@ function createAuthorRow(index) {
   const searchInput = row.querySelector(".author-search");
   const dropdown = row.querySelector(".author-dropdown");
   const hiddenId = row.querySelector(".author-id-hidden");
-  const newAuthorContainer = row.querySelector(".new-author-input");
-  const newAuthorInput = newAuthorContainer.querySelector("input");
-  const cancelNewButton = row.querySelector(".cancel-new-author");
-  const searchContainer = row.querySelector(".author-search-container");
 
   searchInput.addEventListener("input", function () {
     const searchTerm = this.value.toLowerCase();
@@ -216,32 +239,62 @@ function createAuthorRow(index) {
       });
     });
 
-    // New Author Click
+    // New Author Click - Use AJAX to add author immediately
     dropdown
       .querySelector(".new-author-option")
       .addEventListener("click", function () {
-        hiddenId.value = "new";
-        searchContainer.classList.add("hidden");
-        newAuthorContainer.classList.remove("hidden");
-        newAuthorInput.required = true;
-        newAuthorInput.focus();
-        dropdown.classList.add("hidden");
+        const authorName = prompt("Enter new author name:");
+        if (!authorName || authorName.trim() === "") return;
+
+        // Show loading state
+        searchInput.value = "Adding author...";
+        searchInput.disabled = true;
+
+        // AJAX call to add author
+        fetch(
+          window.location.origin +
+            "/lib_system/library_system/admin/ajax/add-author",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: "author_name=" + encodeURIComponent(authorName.trim()),
+          },
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Add to global authors data
+              window.authorsData.push({
+                author_id: data.author.author_id,
+                name: data.author.name,
+              });
+
+              // Set the value
+              searchInput.value = data.author.name;
+              hiddenId.value = data.author.author_id;
+              dropdown.classList.add("hidden");
+              searchInput.disabled = false;
+
+              // Show success message
+              alert(data.message);
+            } else {
+              alert("Error: " + data.message);
+              searchInput.value = "";
+              searchInput.disabled = false;
+            }
+          })
+          .catch((error) => {
+            alert("Error adding author: " + error.message);
+            searchInput.value = "";
+            searchInput.disabled = false;
+          });
       });
   });
 
   searchInput.addEventListener("focus", function () {
     if (this.value === "") this.dispatchEvent(new Event("input"));
-  });
-
-  // Cancel New Author logic
-  cancelNewButton.addEventListener("click", function () {
-    hiddenId.value = "";
-    searchInput.value = "";
-    newAuthorInput.value = "";
-    newAuthorInput.required = false;
-    newAuthorContainer.classList.add("hidden");
-    searchContainer.classList.remove("hidden");
-    searchInput.focus();
   });
 
   // Close dropdown on outside click

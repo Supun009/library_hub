@@ -19,16 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $title = trim($_POST['title']);
     $isbn = trim($_POST['isbn']);
     $categoryId = $_POST['category_id'] ?? '';
-    $newCategoryName = trim($_POST['new_category_name'] ?? '');
     $pubYear = $_POST['publication_year'] ?? NULL;
     
-    // Author Logic - Expecting an array
-    $rawAuthors = $_POST['authors'] ?? []; // Array of ['id' => ..., 'new_name' => ...]
+    // Author IDs - Expecting an array of author IDs
+    $authorIds = $_POST['author_ids'] ?? [];
 
-    if (empty($title) || empty($isbn) || empty($categoryId) || empty($rawAuthors)) {
+    if (empty($title) || empty($isbn) || empty($categoryId) || empty($authorIds)) {
         $error = "Title, ISBN, Category, and at least one Author are required.";
-    } elseif ($categoryId === 'new' && empty($newCategoryName)) {
-        $error = "Please enter a name for the new category.";
     } elseif (!empty($pubYear) && (!is_numeric($pubYear) || $pubYear < 1000 || $pubYear > date('Y') + 1)) {
         $error = "Please enter a valid publication year (1000-" . (date('Y') + 1) . ").";
     } else {
@@ -41,23 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } else {
                 $pdo->beginTransaction();
 
-                // 1. Handle New Category
-                if ($categoryId === 'new') {
-                    // Check if exists
-                    $stmt = $pdo->prepare("SELECT category_id FROM categories WHERE category_name = ?");
-                    $stmt->execute([$newCategoryName]);
-                    $existingCatId = $stmt->fetchColumn();
-                    
-                    if ($existingCatId) {
-                        $categoryId = $existingCatId;
-                    } else {
-                        $stmt = $pdo->prepare("INSERT INTO categories (category_name) VALUES (?)");
-                        $stmt->execute([$newCategoryName]);
-                        $categoryId = $pdo->lastInsertId();
-                    }
-                }
-
-                // 2. Get Status ID (Available)
+                // Get Status ID (Available)
                 $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Available'");
                 $statusId = $stmt->fetchColumn();
                 if (!$statusId) {
@@ -65,59 +46,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $statusId = $pdo->lastInsertId();
                 }
 
-                // 2. Insert Book
+                // Insert Book
                 $totalCopies = (int)($_POST['total_copies'] ?? 1);
-                // Ensure at least 1 copy
                 if ($totalCopies < 1) $totalCopies = 1;
                 
                 $stmt = $pdo->prepare("INSERT INTO books (title, isbn, category_id, status_id, publication_year, total_copies, available_copies) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$title, $isbn, $categoryId, $statusId, $pubYear ?: NULL, $totalCopies, $totalCopies]);
                 $bookId = $pdo->lastInsertId();
 
-                // 3. Handle Authors
-                $uniqueAuthorIds = [];
-
-                foreach ($rawAuthors as $inputUser) {
-                    $authId = $inputUser['id'] ?? '';
-                    $newName = trim($inputUser['new_name'] ?? '');
-
-                    if (empty($authId)) continue;
-
-                    $finalAuthorId = null;
-
-                    if ($authId === 'new') {
-                        if (!empty($newName)) {
-                            // Check if new name actually exists
-                            $stmt = $pdo->prepare("SELECT author_id FROM authors WHERE name = ?");
-                            $stmt->execute([$newName]);
-                            $existingId = $stmt->fetchColumn();
-                            
-                            if ($existingId) {
-                                $finalAuthorId = $existingId;
-                            } else {
-                                $stmt = $pdo->prepare("INSERT INTO authors (name) VALUES (?)");
-                                $stmt->execute([$newName]);
-                                $finalAuthorId = $pdo->lastInsertId();
-                            }
-                        }
-                    } else {
-                        $finalAuthorId = $authId;
-                    }
-
-                    if ($finalAuthorId && !in_array($finalAuthorId, $uniqueAuthorIds)) {
-                        $uniqueAuthorIds[] = $finalAuthorId;
-                        // Link Author to Book
-                        $stmt = $pdo->prepare("INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)");
-                        $stmt->execute([$bookId, $finalAuthorId]);
-                    }
+                // Link Authors to Book
+                $uniqueAuthorIds = array_unique(array_filter($authorIds));
+                
+                if (empty($uniqueAuthorIds)) {
+                    throw new Exception("At least one valid author is required.");
                 }
 
-                if (empty($uniqueAuthorIds)) {
-                    throw new Exception("No valid authors provided.");
+                foreach ($uniqueAuthorIds as $authorId) {
+                    $stmt = $pdo->prepare("INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)");
+                    $stmt->execute([$bookId, $authorId]);
                 }
 
                 $pdo->commit();
-                // Redirect to Manage Books with success message
                 redirect('admin/books?msg=book_added');
                 exit;
             }
