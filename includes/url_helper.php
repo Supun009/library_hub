@@ -114,6 +114,11 @@ function isCurrentUrl($path) {
  * @return void
  */
 function redirect($path, $statusCode = 302) {
-    header('Location: ' . url($path), true, $statusCode);
+    // If path is not a full URL (doesn't start with http/https) and doesn't start with base URL, wrap it
+    if (!preg_match('~^(?:f|ht)tps?://~i', $path) && strpos($path, getBaseUrl()) !== 0) {
+        $path = url($path);
+    }
+    
+    header('Location: ' . $path, true, $statusCode);
     exit;
 }
