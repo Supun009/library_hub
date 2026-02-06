@@ -29,6 +29,25 @@ $router->get('/', function() {
     }
 });
 
+// Auth Routes
+$router->get('/login', function() {
+    require __DIR__ . '/auth/login.php';
+});
+$router->post('/login', function() {
+    require __DIR__ . '/auth/login.php';
+});
+
+$router->get('/signup', function() {
+    require __DIR__ . '/auth/signup.php';
+});
+$router->post('/signup', function() {
+    require __DIR__ . '/auth/signup.php';
+});
+
+$router->get('/logout', function() {
+    require __DIR__ . '/auth/logout.php';
+});
+
 // Example of a clean route wrapping a legacy file (Future Migration Step)
 // $router->get('/login', function() {
 //     require __DIR__ . '/auth/login.php'; // Note: Requires fixing relative paths in login.php

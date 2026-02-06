@@ -1,8 +1,8 @@
 <?php
 // auth/login.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
-require_once '../includes/validation_helper.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
+require_once __DIR__ . '/../includes/validation_helper.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="mt-4 text-center text-sm text-gray-600">
                 Don't have an account?
-                <a href="signup.php" class="font-medium text-indigo-600 hover:text-indigo-700">Sign up</a>
+                <a href="<?php echo url('signup'); ?>" class="font-medium text-indigo-600 hover:text-indigo-700">Sign up</a>
             </div>
         </form>
     </div>
