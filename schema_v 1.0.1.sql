@@ -58,6 +58,8 @@ CREATE TABLE IF NOT EXISTS books (
     title VARCHAR(255) NOT NULL,
     isbn VARCHAR(20) UNIQUE,
     publication_year INT(4) DEFAULT NULL, -- Added from migration
+    total_copies INT NOT NULL DEFAULT 1,
+    available_copies INT NOT NULL DEFAULT 1,
     category_id INT,
     status_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -65,6 +67,10 @@ CREATE TABLE IF NOT EXISTS books (
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
     FOREIGN KEY (status_id) REFERENCES status(status_id) ON DELETE RESTRICT
 );
+
+CREATE INDEX idx_books_title ON books(title);
+CREATE INDEX idx_books_publication_year ON books(publication_year);
+CREATE INDEX idx_books_available_copies ON books(available_copies);
 
 -- 8. Book_Authors Junction Table (Many-to-Many Relationship)
 CREATE TABLE IF NOT EXISTS book_authors (
@@ -91,6 +97,9 @@ CREATE TABLE IF NOT EXISTS members (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_members_full_name ON members(full_name);
+CREATE INDEX idx_members_phone_number ON members(phone_number);
+
 -- 10. Issues/Return Table (Transactions)
 CREATE TABLE IF NOT EXISTS issues (
     issue_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -105,6 +114,10 @@ CREATE TABLE IF NOT EXISTS issues (
     FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE RESTRICT,
     FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE RESTRICT    
 );
+
+CREATE INDEX idx_issues_issue_date ON issues(issue_date);
+CREATE INDEX idx_issues_due_date ON issues(due_date);
+CREATE INDEX idx_issues_return_date ON issues(return_date);
 
 -- 11. Settings Table (Added from migration)
 CREATE TABLE IF NOT EXISTS settings (

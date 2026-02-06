@@ -74,7 +74,7 @@ if ($statusFilter === 'active') {
 
 // Apply search filter to count
 if ($search) {
-    $countQuery .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search)";
+    $countQuery .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search OR m.phone_number LIKE :search)";
 }
 
 $countStmt = $pdo->prepare($countQuery);
@@ -86,7 +86,7 @@ $totalItems = $countStmt->fetch()['total'];
 
 // Fetch members with pagination
 $query = "
-    SELECT m.member_id, m.full_name, m.email, m.join_date, m.status, u.username,
+    SELECT m.member_id, m.full_name, m.email, m.phone_number, m.join_date, m.status, u.username,
            (SELECT COUNT(*) FROM issues i WHERE i.member_id = m.member_id AND i.return_date IS NULL) as active_loans
     FROM members m
     JOIN users u ON m.user_id = u.user_id
@@ -102,7 +102,7 @@ if ($statusFilter === 'active') {
 
 // Apply search filter
 if ($search) {
-    $query .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search)";
+    $query .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search OR m.phone_number LIKE :search)";
 }
 
 $query .= " ORDER BY m.member_id DESC LIMIT :limit OFFSET :offset";
@@ -261,6 +261,7 @@ include '../includes/header.php';
                     <th>Name</th>
                     <th>Student ID</th>
                     <th>Email</th>
+                    <th>Phone</th>
                     <th>Join Date</th>
                     <th>Status</th>
                     <th>Active Loans</th>
@@ -274,6 +275,7 @@ include '../includes/header.php';
                             <td class="font-medium"><?php echo htmlspecialchars($member['full_name']); ?></td>
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['username']); ?></td>
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['email']); ?></td>
+                            <td class="text-gray-500"><?php echo htmlspecialchars($member['phone_number'] ?? '-'); ?></td>
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['join_date']); ?></td>
                             <td>
                                 <span class="badge <?php echo $member['status'] === 'active' ? 'badge-green' : 'badge-red'; ?>">
