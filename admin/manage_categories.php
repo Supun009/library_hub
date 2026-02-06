@@ -185,46 +185,15 @@ include __DIR__ . '/../includes/header.php';
             </tbody>
         </table>
     <?php endif; ?>
-    
-    <!-- Pagination -->
-    <?php if ($totalPages > 1): ?>
-        <div class="border-t border-gray-200 px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-700">
-                    Showing <?php echo $offset + 1; ?> to <?php echo min($offset + $itemsPerPage, $totalCategories); ?> of <?php echo $totalCategories; ?> categories
-                </div>
-                <div class="flex gap-2">
-                    <?php if ($page > 1): ?>
-                        <a href="?page=<?php echo $page - 1; ?>" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                            <i data-lucide="chevron-left" class="mr-1 h-4 w-4"></i>
-                            Previous
-                        </a>
-                    <?php endif; ?>
-                    
-                    <div class="flex gap-1">
-                        <?php
-                        $startPage = max(1, $page - 2);
-                        $endPage = min($totalPages, $page + 2);
-                        
-                        for ($i = $startPage; $i <= $endPage; $i++):
-                        ?>
-                            <a href="?page=<?php echo $i; ?>" class="inline-flex items-center justify-center rounded-md border <?php echo $i === $page ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'; ?> px-3 py-2 text-sm font-medium min-w-[40px]">
-                                <?php echo $i; ?>
-                            </a>
-                        <?php endfor; ?>
-                    </div>
-                    
-                    <?php if ($page < $totalPages): ?>
-                        <a href="?page=<?php echo $page + 1; ?>" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                            Next
-                            <i data-lucide="chevron-right" class="ml-1 h-4 w-4"></i>
-                        </a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
 </div>
+
+<?php
+// Render pagination
+if ($totalPages > 1) {
+    require_once __DIR__ . '/../includes/pagination.php';
+    renderPagination($page, $totalCategories, $itemsPerPage);
+}
+?>
 
 <script>
 // Search functionality
