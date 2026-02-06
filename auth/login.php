@@ -2,6 +2,7 @@
 // auth/login.php
 require_once '../config/db_config.php';
 require_once '../includes/auth_middleware.php';
+require_once '../includes/validation_helper.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
@@ -13,7 +14,7 @@ if (isLoggedIn()) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
+    $username = sanitizeInput($_POST['username']);
     $password = $_POST['password'];
 
     if (empty($username) || empty($password)) {

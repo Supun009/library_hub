@@ -3,6 +3,8 @@
 require_once '../config/db_config.php';
 require_once '../includes/auth_middleware.php';
 
+require_once '../includes/validation_helper.php';
+
 if (isLoggedIn()) {
     header("Location: /lib_system/library_system/index.php");
     exit();
@@ -12,15 +14,25 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
+    $fullName = sanitizeInput($_POST['full_name']);
+    $username = trim($_POST['username']); // Don't fully sanitize username yet to check for invalid chars correctly, but trim is good.
+    $email = sanitizeInput($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    if (empty($username) || empty($email) || empty($password)) {
+    // Validations
+    $usernameValidation = validateUsername($username);
+    $emailValidation = validateEmail($email);
+    $passwordValidation = validatePassword($password);
+
+    if (empty($fullName) || empty($username) || empty($email) || empty($password)) {
         $error = "All fields are required.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = "Please enter a valid email address.";
+    } elseif ($usernameValidation !== true) {
+        $error = $usernameValidation;
+    } elseif ($emailValidation !== true) {
+        $error = $emailValidation;
+    } elseif ($passwordValidation !== true) {
+        $error = $passwordValidation;
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
     } else {
@@ -48,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // Create member entry
                     $stmt = $pdo->prepare("INSERT INTO members (user_id, full_name, email) VALUES (?, ?, ?)");
-                    $stmt->execute([$user_id, $username, $email]);
+                    $stmt->execute([$user_id, $fullName, $email]);
 
                     $pdo->commit();
                     
@@ -96,6 +108,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form action="" method="POST" class="space-y-4">
+            <div>
+                <label for="full_name" class="mb-1 block text-sm font-medium text-gray-700">Full Name</label>
+                <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    required
+                    placeholder="John Doe"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
+            </div>
+
             <div>
                 <label for="username" class="mb-1 block text-sm font-medium text-gray-700">Username</label>
                 <input
