@@ -1,7 +1,7 @@
 <?php
 // admin/manage_members.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
@@ -117,7 +117,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $members = $stmt->fetchAll();
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6 flex items-center justify-between">
@@ -289,7 +289,7 @@ include '../includes/header.php';
                             </td>
                             <td>
                                 <a
-                                    href="edit_member.php?id=<?php echo $member['member_id']; ?>"
+                                    href="<?php echo url('admin/members/edit?id=' . $member['member_id']); ?>"
                                     class="inline-flex items-center justify-center rounded-md border border-indigo-200 bg-white px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
                                 >
                                     <i data-lucide="edit" class="h-4 w-4"></i>
@@ -307,11 +307,11 @@ include '../includes/header.php';
 
 <?php
 // Include and render pagination
-require_once '../includes/pagination.php';
+require_once __DIR__ . '/../includes/pagination.php';
 renderPagination($currentPage, $totalItems, $itemsPerPage, [
     'search' => $search,
     'status' => $statusFilter
 ]);
 ?>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

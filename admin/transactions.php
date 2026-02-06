@@ -1,7 +1,7 @@
 <?php
 // admin/transactions.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
@@ -103,7 +103,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $transactions = $stmt->fetchAll();
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6 flex items-center justify-between">
@@ -113,14 +113,14 @@ include '../includes/header.php';
     </div>
     <div class="flex gap-2">
         <a
-            href="issue_book.php"
+            href="<?php echo url('admin/issue'); ?>"
             class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
         >
             <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
             Issue Book
         </a>
         <a
-            href="return_book.php"
+            href="<?php echo url('admin/return'); ?>"
             class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
         >
             <i data-lucide="arrow-down-left" class="h-4 w-4"></i>
@@ -224,7 +224,7 @@ include '../includes/header.php';
                             <td>
                                 <?php if (!$t['return_date']): ?>
                                     <a
-                                        href="return_book.php?id=<?php echo $t['issue_id']; ?>"
+                                        href="<?php echo url('admin/return?id=' . $t['issue_id']); ?>"
                                         title="Return Book"
                                         class="inline-flex items-center justify-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
                                     >
@@ -244,7 +244,7 @@ include '../includes/header.php';
 
 <?php
 // Include and render pagination
-require_once '../includes/pagination.php';
+require_once __DIR__ . '/../includes/pagination.php';
 renderPagination($currentPage, $totalItems, $itemsPerPage, [
     'search' => $search,
     'status' => $statusFilter,
@@ -252,4 +252,4 @@ renderPagination($currentPage, $totalItems, $itemsPerPage, [
 ]);
 ?>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

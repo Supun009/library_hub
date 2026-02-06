@@ -1,7 +1,7 @@
 <?php
 // admin/add_book.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                 $pdo->commit();
                 // Redirect to Manage Books with success message
-                header("Location: manage_books.php?msg=book_added");
+                redirect('admin/books?msg=book_added');
                 exit;
             }
         } catch (Exception $e) {
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6 flex items-center justify-between">
@@ -139,7 +139,7 @@ include '../includes/header.php';
         <p class="text-sm text-gray-600">Enter details to add a new book to the catalog.</p>
     </div>
     <a
-        href="manage_books.php"
+        href="<?php echo url('admin/books'); ?>"
         class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
     >
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -272,7 +272,7 @@ include '../includes/header.php';
                 Save Book
             </button>
             <a
-                href="manage_books.php"
+                href="<?php echo url('admin/books'); ?>"
                 class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
             >
                 Cancel
@@ -289,4 +289,4 @@ window.categoriesData = <?php echo json_encode($categories); ?>;
 </script>
 <script src="js/add_book.js"></script>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

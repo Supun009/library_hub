@@ -1,7 +1,7 @@
 <?php
 // member/my_loans.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('member');
 
@@ -33,7 +33,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([$memberId]);
 $loanHistory = $stmt->fetchAll();
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6">
@@ -94,7 +94,7 @@ include '../includes/header.php';
                     </div>
                     <p class="text-gray-500">You don't have any active loans right now.</p>
                     <a
-                        href="index.php"
+                        href="<?php echo url('member'); ?>"
                         class="mt-4 inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
                     >
                         Browse Catalog
@@ -133,4 +133,4 @@ include '../includes/header.php';
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

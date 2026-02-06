@@ -1,12 +1,12 @@
 <?php
 // admin/dashboard.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
 $pageTitle = 'Dashboard';
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 
 // Fetch statistics
 try {
@@ -145,4 +145,4 @@ try {
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

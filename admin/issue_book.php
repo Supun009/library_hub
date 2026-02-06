@@ -1,7 +1,7 @@
 <?php
 // admin/issue_book.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     
                     $pdo->commit();
                     $bookCount = count($bookIds);
-                    header("Location: transactions.php?msg=issued&count=$bookCount");
+                    redirect('admin/transactions?msg=issued&count=' . $bookCount);
                     exit;
                 }
             }
@@ -101,7 +101,7 @@ $members = $pdo->query("
 ")->fetchAll();
 
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6 flex items-center justify-between">
@@ -110,7 +110,7 @@ include '../includes/header.php';
         <p class="text-sm text-gray-600">Issue a book to a member</p>
     </div>
     <a
-        href="transactions.php"
+        href="<?php echo url('admin/transactions'); ?>"
         class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
     >
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -223,4 +223,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

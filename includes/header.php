@@ -38,7 +38,7 @@
                     <div class="user-avatar">
                         <?php echo strtoupper(substr($_SESSION['username'] ?? 'U', 0, 2)); ?>
                     </div>
-                    <a href="<?php echo authUrl('logout.php'); ?>" class="btn-logout" title="Logout">
+                    <a href="<?php echo url('logout'); ?>" class="btn-logout" title="Logout">
                         <i data-lucide="log-out" style="width: 20px; height: 20px;"></i>
                     </a>
                 </div>

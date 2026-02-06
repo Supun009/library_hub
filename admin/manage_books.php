@@ -1,7 +1,7 @@
 <?php
 // admin/manage_books.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
@@ -83,7 +83,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $books = $stmt->fetchAll();
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Real-time Search Script -->
@@ -95,7 +95,7 @@ include '../includes/header.php';
         <p class="text-sm text-gray-600">Browse and manage library books</p>
     </div>
     <a
-        href="add_book.php"
+        href="<?php echo url('admin/books/add'); ?>"
         class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
     >
         <i data-lucide="plus" class="h-4 w-4"></i>
@@ -188,11 +188,11 @@ include '../includes/header.php';
 
 <?php
 // Include and render pagination
-require_once '../includes/pagination.php';
+require_once __DIR__ . '/../includes/pagination.php';
 renderPagination($currentPage, $totalItems, $itemsPerPage, [
     'search' => $search,
     'category' => $filter
 ]);
 ?>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

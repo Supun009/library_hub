@@ -1,7 +1,7 @@
 <?php
 // admin/search.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
@@ -90,7 +90,7 @@ if ($hasSearched) {
     $results = $stmt->fetchAll();
 }
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6">
@@ -222,7 +222,7 @@ include '../includes/header.php';
                 Search Books
             </button>
             <a
-                href="search.php"
+                href="<?php echo url('admin/search'); ?>"
                 class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
             >
                 <i data-lucide="x" class="h-4 w-4"></i>
@@ -279,4 +279,4 @@ include '../includes/header.php';
     </div>
 <?php endif; ?>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

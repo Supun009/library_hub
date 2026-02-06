@@ -1,13 +1,13 @@
 <?php
 // admin/edit_member.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
 $memberId = $_GET['id'] ?? null;
 if (!$memberId) {
-    header("Location: manage_members.php");
+    redirect('admin/members');
     exit;
 }
 
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Delete the user (member will be cascade deleted due to ON DELETE CASCADE)
                 $stmt = $pdo->prepare("DELETE FROM users WHERE user_id = (SELECT user_id FROM members WHERE member_id = ?)");
                 $stmt->execute([$memberId]);
-                header("Location: manage_members.php?msg=member_deleted");
+                redirect('admin/members?msg=member_deleted');
                 exit;
             } catch (PDOException $e) {
                 $error = "Error deleting member: " . $e->getMessage();
@@ -103,7 +103,7 @@ if (!$member) {
     die("Member not found or deleted.");
 }
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6 flex items-center justify-between">
@@ -112,7 +112,7 @@ include '../includes/header.php';
         <p class="text-sm text-gray-600">Update details for <?php echo htmlspecialchars($member['full_name']); ?></p>
     </div>
     <a
-        href="manage_members.php"
+        href="<?php echo url('admin/members'); ?>"
         class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
     >
         <i data-lucide="arrow-left" class="h-4 w-4"></i>
@@ -332,4 +332,4 @@ include '../includes/header.php';
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
