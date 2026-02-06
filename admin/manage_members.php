@@ -259,7 +259,7 @@ include __DIR__ . '/../includes/header.php';
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Student ID</th>
+                    <th>Username</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Join Date</th>

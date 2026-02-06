@@ -140,6 +140,16 @@ include __DIR__ . '/../includes/header.php';
                 <input type="hidden" name="action" value="update_details">
                 <div class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
+                        <label class="mb-1 block text-sm font-medium text-gray-700">Username</label>
+                        <input
+                            type="text"
+                            value="<?php echo htmlspecialchars($member['username']); ?>"
+                            disabled
+                            class="block w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-sm shadow-sm text-gray-500 cursor-not-allowed"
+                        >
+                        <p class="mt-1 text-xs text-gray-500">Username cannot be changed</p>
+                    </div>
+                    <div>
                         <label class="mb-1 block text-sm font-medium text-gray-700">Full Name</label>
                         <input
                             type="text"
