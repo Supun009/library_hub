@@ -56,14 +56,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Fetch all categories with book count
-$stmt = $pdo->query("
+// Pagination settings
+$itemsPerPage = 10;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($page - 1) * $itemsPerPage;
+
+// Get total count
+$totalStmt = $pdo->query("SELECT COUNT(*) FROM categories");
+$totalCategories = $totalStmt->fetchColumn();
+$totalPages = ceil($totalCategories / $itemsPerPage);
+
+// Fetch categories with pagination
+$stmt = $pdo->prepare("
     SELECT c.category_id, c.category_name, COUNT(b.book_id) as book_count
     FROM categories c
     LEFT JOIN books b ON c.category_id = b.category_id
     GROUP BY c.category_id, c.category_name
     ORDER BY c.category_name ASC
+    LIMIT :limit OFFSET :offset
 ");
+$stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $categories = $stmt->fetchAll();
 
 include __DIR__ . '/../includes/header.php';
@@ -108,11 +122,15 @@ include __DIR__ . '/../includes/header.php';
     </form>
 </div>
 
-<!-- Categories List -->
 <div class="rounded-md border border-gray-200 bg-white shadow-sm">
     <div class="border-b border-gray-200 px-6 py-4">
         <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900">All Categories (<?php echo count($categories); ?>)</h2>
+            <h2 class="text-lg font-semibold text-gray-900">
+                All Categories (<?php echo $totalCategories; ?>)
+                <?php if ($totalPages > 1): ?>
+                    <span class="text-sm font-normal text-gray-500">- Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+                <?php endif; ?>
+            </h2>
             <div class="relative">
                 <input
                     type="text"
@@ -166,6 +184,45 @@ include __DIR__ . '/../includes/header.php';
                 <?php endforeach; ?>
             </tbody>
         </table>
+    <?php endif; ?>
+    
+    <!-- Pagination -->
+    <?php if ($totalPages > 1): ?>
+        <div class="border-t border-gray-200 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing <?php echo $offset + 1; ?> to <?php echo min($offset + $itemsPerPage, $totalCategories); ?> of <?php echo $totalCategories; ?> categories
+                </div>
+                <div class="flex gap-2">
+                    <?php if ($page > 1): ?>
+                        <a href="?page=<?php echo $page - 1; ?>" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <i data-lucide="chevron-left" class="mr-1 h-4 w-4"></i>
+                            Previous
+                        </a>
+                    <?php endif; ?>
+                    
+                    <div class="flex gap-1">
+                        <?php
+                        $startPage = max(1, $page - 2);
+                        $endPage = min($totalPages, $page + 2);
+                        
+                        for ($i = $startPage; $i <= $endPage; $i++):
+                        ?>
+                            <a href="?page=<?php echo $i; ?>" class="inline-flex items-center justify-center rounded-md border <?php echo $i === $page ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'; ?> px-3 py-2 text-sm font-medium min-w-[40px]">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endfor; ?>
+                    </div>
+                    
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?page=<?php echo $page + 1; ?>" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Next
+                            <i data-lucide="chevron-right" class="ml-1 h-4 w-4"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
     <?php endif; ?>
 </div>
 
