@@ -12,15 +12,19 @@ if (strpos($currentPath, $basePath) === 0) {
 }
 $currentRoute = '/' . ltrim($currentRoute, '/');
 
-// Helper to check active state
-function isActive($pattern) {
-    global $currentRoute;
-    // Special case for Member Home to prevent overlap with other /member/* routes
+
+// Helper to check active state - now accepts current route as parameter
+function isActive($pattern, $currentRoute) {
+    // Special case for member home - exact match only
     if ($pattern === '/member') {
         return $currentRoute === '/member' || $currentRoute === '/member/';
     }
-    // Check for exact match or prefix match (e.g. /admin/books/add matches /admin/books)
-    return $currentRoute === $pattern || strpos($currentRoute, $pattern) === 0;
+    
+    // For all other routes: exact match OR starts with pattern
+    // This handles both /admin/search and /admin/books/add matching /admin/books
+    $result = $currentRoute === $pattern || strpos($currentRoute, $pattern) === 0;
+    
+    return $result;
 }
 ?>
 <aside class="sidebar">
@@ -30,56 +34,56 @@ function isActive($pattern) {
     <ul class="sidebar-nav">
         <?php if (hasRole('admin')): ?>
             <li>
-                <a href="<?php echo url('admin/dashboard'); ?>" class="<?php echo isActive('/admin/dashboard') ? 'active' : ''; ?>">
+                <a href="<?php echo url('admin/dashboard'); ?>" class="<?php echo isActive('/admin/dashboard', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="layout-dashboard"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo url('admin/books'); ?>" class="<?php echo isActive('/admin/books') ? 'active' : ''; ?>">
+                <a href="<?php echo url('admin/books'); ?>" class="<?php echo isActive('/admin/books', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="book-open"></i>
                     <span>Book Catalog</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo url('admin/search'); ?>" class="<?php echo isActive('/admin/search') ? 'active' : ''; ?>">
+                <a href="<?php echo url('admin/search'); ?>" class="<?php echo isActive('/admin/search', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="search"></i>
                     <span>Advanced Search</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo url('admin/members'); ?>" class="<?php echo isActive('/admin/members') ? 'active' : ''; ?>">
+                <a href="<?php echo url('admin/members'); ?>" class="<?php echo isActive('/admin/members', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="users"></i>
                     <span>Member Management</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo url('admin/transactions'); ?>" class="<?php echo isActive('/admin/transactions') || isActive('/admin/issue') || isActive('/admin/return') ? 'active' : ''; ?>">
+                <a href="<?php echo url('admin/transactions'); ?>" class="<?php echo isActive('/admin/transactions', $currentRoute) || isActive('/admin/issue', $currentRoute) || isActive('/admin/return', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="arrow-left-right"></i>
                     <span>Transactions</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo url('admin/profile'); ?>" class="<?php echo isActive('/admin/profile') ? 'active' : ''; ?>">
+                <a href="<?php echo url('admin/profile'); ?>" class="<?php echo isActive('/admin/profile', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="settings"></i>
                     <span>Profile & Settings</span>
                 </a>
             </li>
         <?php elseif (hasRole('member')): ?>
             <li>
-                <a href="<?php echo url('member'); ?>" class="<?php echo isActive('/member') ? 'active' : ''; ?>">
+                <a href="<?php echo url('member'); ?>" class="<?php echo isActive('/member', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="book-open"></i>
                     <span>Browse Catalog</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo url('member/search'); ?>" class="<?php echo isActive('/member/search') ? 'active' : ''; ?>">
+                <a href="<?php echo url('member/search'); ?>" class="<?php echo isActive('/member/search', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="search"></i>
                     <span>Advanced Search</span>
                 </a>
             </li>
             <li>
-                <a href="<?php echo url('member/loans'); ?>" class="<?php echo isActive('/member/loans') ? 'active' : ''; ?>">
+                <a href="<?php echo url('member/loans'); ?>" class="<?php echo isActive('/member/loans', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="history"></i>
                     <span>My Loans</span>
                 </a>

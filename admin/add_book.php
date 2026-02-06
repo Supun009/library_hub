@@ -287,6 +287,6 @@ include __DIR__ . '/../includes/header.php';
 window.authorsData = <?php echo json_encode($authors); ?>;
 window.categoriesData = <?php echo json_encode($categories); ?>;
 </script>
-<script src="js/add_book.js"></script>
+<script src="<?php echo url('admin/js/add_book.js'); ?>"></script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
