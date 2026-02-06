@@ -191,7 +191,7 @@ include __DIR__ . '/../includes/header.php';
                     <th>Due Date</th>
                     <th>Return Date</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <!-- <th>Actions</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -221,7 +221,7 @@ include __DIR__ . '/../includes/header.php';
                                     <?php echo $status; ?>
                                 </span>
                             </td>
-                            <td>
+                            <!-- <td>
                                 <?php if (!$t['return_date']): ?>
                                     <a
                                         href="<?php echo url('admin/return?id=' . $t['issue_id']); ?>"
@@ -231,7 +231,7 @@ include __DIR__ . '/../includes/header.php';
                                         <i data-lucide="corner-down-left" class="h-4 w-4"></i>
                                     </a>
                                 <?php endif; ?>
-                            </td>
+                            </td> -->
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
