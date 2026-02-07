@@ -1,7 +1,7 @@
 <?php
 // admin/manage_members.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
@@ -50,87 +50,201 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'member_deleted') {
     $success = "Member deleted successfully.";
 }
 
-// Fetch Members
+// Fetch Members with Pagination
 $search = $_GET['search'] ?? '';
+$statusFilter = $_GET['status'] ?? 'all'; // 'all', 'active', 'inactive'
+$currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$itemsPerPage = 10;
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+// Count total members for pagination
+$countQuery = "
+    SELECT COUNT(*) as total
+    FROM members m
+    JOIN users u ON m.user_id = u.user_id
+    WHERE 1=1
+";
+
+// Apply status filter to count
+if ($statusFilter === 'active') {
+    $countQuery .= " AND m.status = 'active'";
+} elseif ($statusFilter === 'inactive') {
+    $countQuery .= " AND m.status = 'inactive'";
+}
+
+// Apply search filter to count
+if ($search) {
+    $countQuery .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search OR m.phone_number LIKE :search)";
+}
+
+$countStmt = $pdo->prepare($countQuery);
+if ($search) {
+    $countStmt->bindValue(':search', "%$search%");
+}
+$countStmt->execute();
+$totalItems = $countStmt->fetch()['total'];
+
+// Fetch members with pagination
 $query = "
-    SELECT m.member_id, m.full_name, m.email, m.join_date, m.status, u.username,
+    SELECT m.member_id, m.full_name, m.email, m.phone_number, m.join_date, m.status, u.username,
            (SELECT COUNT(*) FROM issues i WHERE i.member_id = m.member_id AND i.return_date IS NULL) as active_loans
     FROM members m
     JOIN users u ON m.user_id = u.user_id
-    WHERE m.deleted_at IS NULL
+    WHERE 1=1
 ";
 
-if ($search) {
-    $query .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search)";
+// Apply status filter
+if ($statusFilter === 'active') {
+    $query .= " AND m.status = 'active'";
+} elseif ($statusFilter === 'inactive') {
+    $query .= " AND m.status = 'inactive'";
 }
 
-$query .= " ORDER BY m.member_id DESC";
-// ... (rest of execution)
+// Apply search filter
+if ($search) {
+    $query .= " AND (m.full_name LIKE :search OR m.email LIKE :search OR u.username LIKE :search OR m.phone_number LIKE :search)";
+}
+
+$query .= " ORDER BY m.member_id DESC LIMIT :limit OFFSET :offset";
 
 $stmt = $pdo->prepare($query);
 
 if ($search) {
     $stmt->bindValue(':search', "%$search%");
 }
+$stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $members = $stmt->fetchAll();
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="mb-6 flex justify-between items-center">
+<div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-2xl text-gray-900 mb-1">Member Management</h1>
-        <p class="text-gray-600">Register and manage library members</p>
+        <h1 class="mb-1 text-2xl font-semibold text-gray-900">Member Management</h1>
+        <p class="text-sm text-gray-600">Register and manage library members</p>
     </div>
-    <button onclick="document.getElementById('addMemberForm').classList.toggle('hidden')" class="btn btn-primary">
-        <i data-lucide="user-plus"></i>
+    <button
+        data-testid="add-member-button"
+        onclick="document.getElementById('addMemberForm').classList.toggle('hidden')"
+        class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+    >
+        <i data-lucide="user-plus" class="h-4 w-4"></i>
         Add New Member
     </button>
 </div>
 
 <?php if ($error): ?>
-    <div class="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-200"><?php echo htmlspecialchars($error); ?></div>
+    <div data-testid="error-alert" class="mb-4 rounded-md border border-red-200 bg-red-100 px-4 py-3 text-sm text-red-700">
+        <?php echo htmlspecialchars($error); ?>
+    </div>
 <?php endif; ?>
 <?php if ($success): ?>
-    <div class="mb-4 p-3 bg-green-100 text-green-700 rounded border border-green-200"><?php echo htmlspecialchars($success); ?></div>
+    <div data-testid="success-alert" class="mb-4 rounded-md border border-green-200 bg-green-100 px-4 py-3 text-sm text-green-700">
+        <?php echo htmlspecialchars($success); ?>
+    </div>
 <?php endif; ?>
 
 <!-- Add Member Form (Hidden by default) -->
-<div id="addMemberForm" class="hidden mb-6 bg-white p-6 rounded shadow-sm border border-gray-200">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Register New Member</h2>
+<div id="addMemberForm" class="hidden mb-6 rounded border border-gray-200 bg-white p-6 shadow-sm">
+    <h2 class="mb-4 text-lg font-semibold text-gray-900">Register New Member</h2>
     <form method="POST">
         <input type="hidden" name="action" value="add_member">
-        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+        <div class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Full Name</label>
-                <input type="text" name="full_name" class="form-control" required placeholder="e.g. John Doe">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Full Name</label>
+                <input
+                    type="text"
+                    name="full_name"
+                    data-testid="input-full-name"
+                    required
+                    placeholder="e.g. John Doe"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" class="form-control" required placeholder="john@example.com">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
+                <input
+                    type="email"
+                    name="email"
+                    data-testid="input-email"
+                    required
+                    placeholder="john@example.com"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Username / Student ID</label>
-                <input type="text" name="username" class="form-control" required placeholder="e.g. STU001">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Username / Student ID</label>
+                <input
+                    type="text"
+                    name="username"
+                    data-testid="input-username"
+                    required
+                    placeholder="e.g. STU001"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
             <div>
-                <label class="block text-sm text-gray-700 mb-1">Password</label>
-                <input type="password" name="password" class="form-control" required placeholder="Default password">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    data-testid="input-password"
+                    required
+                    placeholder="Default password"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
         </div>
         <div class="flex gap-2">
-            <button type="submit" class="btn btn-primary">Register Member</button>
-            <button type="button" onclick="document.getElementById('addMemberForm').classList.add('hidden')" class="btn" style="background: #e5e7eb; color: #374151;">Cancel</button>
+            <button
+                type="submit"
+                data-testid="submit-register-member"
+                class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+                Register Member
+            </button>
+            <button
+                type="button"
+                onclick="document.getElementById('addMemberForm').classList.add('hidden')"
+                class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+            >
+                Cancel
+            </button>
         </div>
     </form>
 </div>
 
-<!-- Search Bar -->
-<div class="mb-6 bg-white p-4 rounded shadow-sm border border-gray-200">
-    <form method="GET" class="header-search" style="margin: 0; max-width: 100%;">
-        <i data-lucide="search"></i>
-        <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search members by name, email, or ID...">
+<!-- Search Bar and Filters -->
+<div class="mb-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <form method="GET" class="flex flex-col gap-3 md:flex-row md:items-center">
+        <!-- Search Input -->
+        <div class="relative flex-grow">
+            <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+            <input
+                type="text"
+                name="search"
+                data-testid="search-members"
+                value="<?php echo htmlspecialchars($search); ?>"
+                placeholder="Search members by name, email, or ID..."
+                class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
+        </div>
+        
+        <!-- Status Filter -->
+        <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Status:</label>
+            <select
+                name="status"
+                onchange="this.form.submit()"
+                class="block rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
+                <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All Members</option>
+                <option value="active" <?php echo $statusFilter === 'active' ? 'selected' : ''; ?>>Active Only</option>
+                <option value="inactive" <?php echo $statusFilter === 'inactive' ? 'selected' : ''; ?>>Inactive Only</option>
+            </select>
+        </div>
     </form>
 </div>
 
@@ -138,16 +252,18 @@ include '../includes/header.php';
 <div class="table-container">
     <div class="table-header">
         <h2 class="text-lg font-semibold text-gray-900">Registered Members</h2>
-        <p class="text-gray-500 text-sm mt-1">Total: <?php echo count($members); ?> member(s)</p>
+        <p class="text-gray-500 text-sm mt-1">Total: <?php echo $totalItems; ?> member(s)</p>
     </div>
     <div class="overflow-x-auto">
         <table>
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Student ID</th>
+                    <th>Username</th>
                     <th>Email</th>
+                    <th>Phone</th>
                     <th>Join Date</th>
+                    <th>Status</th>
                     <th>Active Loans</th>
                     <th>Actions</th>
                 </tr>
@@ -159,25 +275,53 @@ include '../includes/header.php';
                             <td class="font-medium"><?php echo htmlspecialchars($member['full_name']); ?></td>
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['username']); ?></td>
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['email']); ?></td>
+                            <td class="text-gray-500"><?php echo htmlspecialchars($member['phone_number'] ?? '-'); ?></td>
                             <td class="text-gray-500"><?php echo htmlspecialchars($member['join_date']); ?></td>
+                            <td>
+                                <span class="badge <?php echo $member['status'] === 'active' ? 'badge-green' : 'badge-red'; ?>">
+                                    <?php echo ucfirst($member['status']); ?>
+                                </span>
+                            </td>
                             <td>
                                 <span class="badge <?php echo $member['active_loans'] > 0 ? 'badge-blue' : 'badge-gray'; ?>">
                                     <?php echo $member['active_loans']; ?>
                                 </span>
                             </td>
                             <td>
-                                <a href="edit_member.php?id=<?php echo $member['member_id']; ?>" class="btn" style="padding: 0.25rem 0.5rem; color: var(--primary-color);">
-                                    <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
-                                </a>
+                                <div class="flex items-center gap-2">
+                                    <a
+                                        href="<?php echo url('admin/members/history?id=' . $member['member_id']); ?>"
+                                        class="inline-flex items-center justify-center rounded-md border border-blue-200 bg-white px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                                        title="View Issue History"
+                                    >
+                                        <i data-lucide="eye" class="h-4 w-4"></i>
+                                    </a>
+                                    <a
+                                        href="<?php echo url('admin/members/edit?id=' . $member['member_id']); ?>"
+                                        class="inline-flex items-center justify-center rounded-md border border-indigo-200 bg-white px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                        title="Edit Member"
+                                    >
+                                        <i data-lucide="edit" class="h-4 w-4"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="6" class="text-center p-6 text-gray-500">No members found.</td></tr>
+                    <tr><td colspan="7" class="text-center p-6 text-gray-500">No members found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php
+// Include and render pagination
+require_once __DIR__ . '/../includes/pagination.php';
+renderPagination($currentPage, $totalItems, $itemsPerPage, [
+    'search' => $search,
+    'status' => $statusFilter
+]);
+?>
+
+<?php include __DIR__ . '/../includes/footer.php'; ?>

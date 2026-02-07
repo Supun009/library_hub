@@ -1,21 +1,44 @@
-# OS metadata
-.DS_Store
-Thumbs.db
+# Environment files
+.env
+.env.local
+.env.*.local
 
-# IDEs and editors
+# IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
+*.sublime-project
+*.sublime-workspace
 
-# Environment and dependencies
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Upload directories (if you have user uploads)
+uploads/*
+!uploads/.gitkeep
+
+# Cache directories
+cache/*
+!cache/.gitkeep
+
+# Vendor directory (if using Composer)
+vendor/
+
+# Node modules (if using npm)
 node_modules/
-venv/
-.env
-__pycache__/
 
-# Build and distribution
+# Build files
 dist/
 build/
-out/
-*.log

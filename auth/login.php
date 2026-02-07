@@ -1,19 +1,19 @@
 <?php
 // auth/login.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
+require_once __DIR__ . '/../includes/validation_helper.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
-    if (hasRole('admin')) header("Location: /lib_system/library_system/admin/dashboard.php");
-    else header("Location: /lib_system/library_system/member/index.php");
-    exit();
+    if (hasRole('admin')) redirect(adminUrl('dashboard.php'));
+    else redirect(memberUrl('index.php'));
 }
 
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
+    $username = sanitizeInput($_POST['username']);
     $password = $_POST['password'];
 
     if (empty($username) || empty($password)) {
@@ -30,11 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role_id'] = $user['role_id'];
 
             if ($user['role_id'] == 1) { // Admin
-                header("Location: /lib_system/library_system/admin/dashboard.php");
+                redirect(adminUrl('dashboard.php'));
             } else { // Member
-                header("Location: /lib_system/library_system/member/index.php");
+                redirect(memberUrl('index.php'));
             }
-            exit();
         } else {
             $error = "Invalid credentials.";
         }
@@ -47,34 +46,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Library System</title>
-    <link rel="stylesheet" href="/lib_system/library_system/assets/css/style.css">
+
+    <!-- Tailwind CSS (step 1: add alongside existing styles, do not remove old CSS yet) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Existing custom stylesheet (kept for now to avoid breaking layout) -->
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
 </head>
 <body class="auth-body">
     <div class="auth-container">
-        <div class="auth-header">
-            <h1>Library Portal</h1>
-            <p class="text-light">Sign in to your account</p>
+        <div class="mb-6 text-center">
+            <h1 class="text-2xl font-semibold text-gray-900">Library Portal</h1>
+            <p class="mt-1 text-sm text-gray-500">Sign in to your account</p>
         </div>
-        
+
         <?php if ($error): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+            <div class="mb-4 rounded-md border border-red-200 bg-red-100 px-4 py-3 text-sm text-red-700">
+                <?php echo htmlspecialchars($error); ?>
+            </div>
         <?php endif; ?>
 
-        <form action="" method="POST">
-            <div class="form-group">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" id="username" name="username" class="form-control" required autofocus>
+        <form action="" method="POST" class="space-y-4">
+            <div>
+                <label for="username" class="mb-1 block text-sm font-medium text-gray-700">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    data-testid="login-username"
+                    required
+                    autofocus
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
-            
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" id="password" name="password" class="form-control" required>
+
+            <div>
+                <label for="password" class="mb-1 block text-sm font-medium text-gray-700">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    data-testid="login-password"
+                    required
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
             </div>
-            
-            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-            
-            <div class="text-center mt-4">
-                <span class="text-sm">Don't have an account? <a href="signup.php" class="text-indigo">Sign up</a></span>
+
+            <button
+                type="submit"
+                data-testid="login-submit"
+                class="mt-2 inline-flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+                Sign In
+            </button>
+
+            <div class="mt-4 text-center text-sm text-gray-600">
+                Don't have an account?
+                <a href="<?php echo url('signup'); ?>" class="font-medium text-indigo-600 hover:text-indigo-700">Sign up</a>
             </div>
         </form>
     </div>

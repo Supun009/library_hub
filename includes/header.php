@@ -5,9 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Management System</title>
-    <link rel="stylesheet" href="/lib_system/library_system/assets/css/style.css">
+
+    <!-- Tailwind CSS (step 1: add alongside existing styles, do not remove old CSS yet) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Existing custom stylesheet (kept for now to avoid breaking layout) -->
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
+
     <!-- Unpkg for Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Global Search Script -->
+    <script src="<?php echo asset('js/global-search.js'); ?>" defer></script>
 </head>
 <body>
     <div class="wrapper">
@@ -18,7 +27,7 @@
                 <!-- Global Search -->
                 <div class="header-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search books, members, or transactions...">
+                    <input type="text" placeholder="Search books, authors, or ISBN...">
                 </div>
 
                 <div class="user-menu">
@@ -29,7 +38,7 @@
                     <div class="user-avatar">
                         <?php echo strtoupper(substr($_SESSION['username'] ?? 'U', 0, 2)); ?>
                     </div>
-                    <a href="/lib_system/library_system/auth/logout.php" class="btn-logout" title="Logout">
+                    <a href="<?php echo url('logout'); ?>" class="btn-logout" title="Logout">
                         <i data-lucide="log-out" style="width: 20px; height: 20px;"></i>
                     </a>
                 </div>

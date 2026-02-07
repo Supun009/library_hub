@@ -1,7 +1,7 @@
 <?php
 // member/index.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('member');
 
@@ -48,7 +48,7 @@ $books = $stmt->fetchAll();
 // Fetch Categories for Filter
 $cats = $pdo->query("SELECT category_name FROM categories")->fetchAll(PDO::FETCH_COLUMN);
 
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6">
@@ -111,4 +111,4 @@ include '../includes/header.php';
     <?php endif; ?>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

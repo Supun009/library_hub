@@ -1,12 +1,12 @@
 <?php
 // admin/dashboard.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireRole('admin');
 
 $pageTitle = 'Dashboard';
-include '../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 
 // Fetch statistics
 try {
@@ -44,8 +44,8 @@ try {
 ?>
 
 <div class="mb-6">
-    <h1 class="text-2xl text-gray-900 mb-1">Dashboard</h1>
-    <p class="text-gray-600">Welcome back! Here's what's happening today.</p>
+    <h1 class="mb-1 text-2xl font-semibold text-gray-900">Dashboard</h1>
+    <p class="text-sm text-gray-600">Welcome back! Here's what's happening today.</p>
 </div>
 
 <!-- Stats Grid -->
@@ -145,4 +145,4 @@ try {
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
