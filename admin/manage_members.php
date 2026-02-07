@@ -138,7 +138,7 @@ $members = $stmt->fetchAll();
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
         <h1 class="page-heading">Member Management</h1>
         <p class="text-sm text-gray-600">Register and manage library members</p>
@@ -146,7 +146,7 @@ include __DIR__ . '/../includes/header.php';
     <button
         data-testid="add-member-button"
         onclick="document.getElementById('addMemberForm').classList.toggle('hidden')"
-        class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+        class="inline-flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors w-full sm:w-auto"
     >
         <i data-lucide="user-plus" class="h-4 w-4"></i>
         Add New Member
@@ -215,18 +215,18 @@ include __DIR__ . '/../includes/header.php';
                 >
             </div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-col sm:flex-row gap-2">
             <button
                 type="submit"
                 data-testid="submit-register-member"
-                class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+                class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors w-full sm:w-auto"
             >
                 Register Member
             </button>
             <button
                 type="button"
                 onclick="document.getElementById('addMemberForm').classList.add('hidden')"
-                class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors w-full sm:w-auto"
             >
                 Cancel
             </button>
@@ -236,7 +236,7 @@ include __DIR__ . '/../includes/header.php';
 
 <!-- Search Bar and Filters -->
 <div class="mb-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
-    <form method="GET" class="flex flex-col gap-3 md:flex-row md:items-center">
+    <form method="GET" class="flex flex-col gap-3 py-2 md:flex-row md:items-center">
         <!-- Search Input -->
         <div class="relative flex-grow">
             <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
@@ -251,17 +251,32 @@ include __DIR__ . '/../includes/header.php';
         </div>
         
         <!-- Status Filter -->
-        <div class="flex items-center gap-2">
-            <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Status:</label>
-            <select
-                name="status"
-                onchange="this.form.submit()"
-                class="block rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            >
-                <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All Members</option>
-                <option value="active" <?php echo $statusFilter === 'active' ? 'selected' : ''; ?>>Active Only</option>
-                <option value="inactive" <?php echo $statusFilter === 'inactive' ? 'selected' : ''; ?>>Inactive Only</option>
-            </select>
+        <div class="relative w-full md:w-auto">
+            <details class="group relative w-full md:w-[180px]">
+                <summary class="flex items-center justify-between w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 list-none">
+                    <span class="truncate">
+                        <?php 
+                            $statusLabels = [
+                                'all' => 'All Members',
+                                'active' => 'Active Only',
+                                'inactive' => 'Inactive Only'
+                            ];
+                            echo $statusLabels[$statusFilter] ?? 'All Members';
+                        ?>
+                    </span>
+                    <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180"></i>
+                </summary>
+                <div class="absolute right-0 z-10 mt-1 w-full min-w-[180px] origin-top-right rounded-md border border-gray-200 bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <?php foreach ($statusLabels as $val => $label): ?>
+                        <a 
+                            href="?<?php echo http_build_query(array_merge($_GET, ['status' => $val, 'page' => 1])); ?>"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <?php echo $statusFilter === $val ? 'bg-gray-50 font-medium text-indigo-600' : ''; ?>"
+                        >
+                            <?php echo $label; ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </details>
         </div>
     </form>
 </div>
@@ -273,39 +288,39 @@ include __DIR__ . '/../includes/header.php';
         <p class="text-gray-500 text-sm mt-1">Total: <?php echo $totalItems; ?> member(s)</p>
     </div>
     <div class="overflow-x-auto">
-        <table>
+        <table class="w-full">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Join Date</th>
-                    <th>Status</th>
-                    <th>Active Loans</th>
-                    <th>Actions</th>
+                    <th class="whitespace-nowrap">Name</th>
+                    <th class="whitespace-nowrap">Username</th>
+                    <th class="whitespace-nowrap">Email</th>
+                    <th class="whitespace-nowrap">Phone</th>
+                    <th class="whitespace-nowrap">Join Date</th>
+                    <th class="whitespace-nowrap">Status</th>
+                    <th class="whitespace-nowrap">Active Loans</th>
+                    <th class="whitespace-nowrap">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (count($members) > 0): ?>
                     <?php foreach ($members as $member): ?>
                         <tr>
-                            <td class="font-medium"><?php echo htmlspecialchars($member['full_name']); ?></td>
-                            <td class="text-gray-500"><?php echo htmlspecialchars($member['username']); ?></td>
-                            <td class="text-gray-500"><?php echo htmlspecialchars($member['email']); ?></td>
-                            <td class="text-gray-500"><?php echo htmlspecialchars($member['phone_number'] ?? '-'); ?></td>
-                            <td class="text-gray-500"><?php echo htmlspecialchars($member['join_date']); ?></td>
-                            <td>
+                            <td class="font-medium whitespace-nowrap"><?php echo htmlspecialchars($member['full_name']); ?></td>
+                            <td class="text-gray-500 whitespace-nowrap"><?php echo htmlspecialchars($member['username']); ?></td>
+                            <td class="text-gray-500 whitespace-nowrap"><?php echo htmlspecialchars($member['email']); ?></td>
+                            <td class="text-gray-500 whitespace-nowrap"><?php echo htmlspecialchars($member['phone_number'] ?? '-'); ?></td>
+                            <td class="text-gray-500 whitespace-nowrap"><?php echo htmlspecialchars($member['join_date']); ?></td>
+                            <td class="whitespace-nowrap">
                                 <span class="badge <?php echo $member['status'] === 'active' ? 'badge-green' : 'badge-red'; ?>">
                                     <?php echo ucfirst($member['status']); ?>
                                 </span>
                             </td>
-                            <td>
+                            <td class="whitespace-nowrap">
                                 <span class="badge <?php echo $member['active_loans'] > 0 ? 'badge-blue' : 'badge-gray'; ?>">
                                     <?php echo $member['active_loans']; ?>
                                 </span>
                             </td>
-                            <td>
+                            <td class="whitespace-nowrap">
                                 <div class="flex items-center gap-2">
                                     <a
                                         href="<?php echo url('admin/members/history?id=' . $member['member_id']); ?>"
@@ -343,3 +358,15 @@ renderPagination($currentPage, $totalItems, $itemsPerPage, [
 ?>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+<script>
+    // Close details dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            if (detail.hasAttribute('open') && !detail.contains(e.target)) {
+                detail.removeAttribute('open');
+            }
+        });
+    });
+</script>
