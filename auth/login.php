@@ -8,7 +8,7 @@ $config = require __DIR__ . '/../config/app_config.php';
 // Redirect if already logged in
 if (isLoggedIn()) {
     if (hasRole('admin')) redirect(adminUrl('dashboard'));
-    else redirect(memberUrl('/'));
+    else redirect('member');
 }
 
 $error = '';
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user['role_id'] == 1) { // Admin
                 redirect(adminUrl('dashboard'));
             } else { // Member
-                redirect(memberUrl('/'));
+                redirect('member');
             }
         } else {
             $error = "Invalid credentials.";

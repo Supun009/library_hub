@@ -38,7 +38,7 @@ function requireRole($role) {
         if (hasRole('admin')) {
             redirect(adminUrl('dashboard'));
         } else {
-            redirect(memberUrl('/'));
+            redirect('member');
         }
     }
 }
