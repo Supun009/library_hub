@@ -40,6 +40,13 @@ if (strlen($query) >= 2) {
         $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         foreach ($books as $book) {
+            // Determine URL based on user role
+            if (hasRole('admin')) {
+                $searchUrl = adminUrl('books?search=' . urlencode($book['title']));
+            } else {
+                $searchUrl = url('member?search=' . urlencode($book['title']));
+            }
+            
             $results[] = [
                 'type' => 'book',
                 'id' => $book['book_id'],
@@ -48,7 +55,7 @@ if (strlen($query) >= 2) {
                 'meta' => 'ISBN: ' . $book['isbn'],
                 'status' => $book['status_name'],
                 'category' => $book['category_name'],
-                'url' => adminUrl('books?search=' . urlencode($book['isbn']))
+                'url' => $searchUrl
             ];
         }
         
