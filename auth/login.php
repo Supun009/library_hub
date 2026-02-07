@@ -74,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     type="text"
                     id="username"
                     name="username"
+                    autocomplete="username"
                     data-testid="login-username"
                     required
                     autofocus
@@ -87,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     type="password"
                     id="password"
                     name="password"
+                    autocomplete="current-password"
                     data-testid="login-password"
                     required
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"

@@ -10,10 +10,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Existing custom stylesheet (kept for now to avoid breaking layout) -->
-    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>?v=<?php echo time(); ?>">
 
     <!-- Unpkg for Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Mobile Navigation Script -->
+    <script src="<?php echo asset('js/mobile-nav.js'); ?>?v=<?php echo time(); ?>" defer></script>
     
     <!-- Global Search Script -->
     <script src="<?php echo asset('js/global-search.js'); ?>?v=<?php echo time(); ?>" defer></script>
@@ -33,13 +36,19 @@
     </script>
 </head>
 <body>
+    <div id="sidebar-overlay"></div>
     <div class="wrapper">
         <?php include __DIR__ . '/sidebar.php'; ?>
         
         <div class="main-content">
             <header class="top-header">
+                <!-- Mobile Hamburger Button -->
+                <button id="hamburger-btn" class="md:hidden p-2 mr-4 text-gray-600 hover:text-gray-900 focus:outline-none">
+                    <i data-lucide="menu"></i>
+                </button>
+                
                 <!-- Global Search -->
-                <div class="header-search">
+                <div class="header-search hidden md:block">
                     <i data-lucide="search"></i>
                     <input type="text" placeholder="Search books, authors, or ISBN...">
                 </div>

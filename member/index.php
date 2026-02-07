@@ -25,7 +25,8 @@ $conditions = [];
 $params = [];
 
 if ($search) {
-    $conditions[] = "(b.title LIKE ? OR b.isbn LIKE ?)";
+    $conditions[] = "(b.title LIKE ? OR b.isbn LIKE ? OR EXISTS (SELECT 1 FROM book_authors ba_search JOIN authors a_search ON ba_search.author_id = a_search.author_id WHERE ba_search.book_id = b.book_id AND a_search.name LIKE ?))";
+    $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
 }
@@ -58,31 +59,55 @@ include __DIR__ . '/../includes/header.php';
 
 <!-- Search and Filter -->
 <div class="mb-6 bg-white p-4 rounded shadow-sm border border-gray-200">
-    <form method="GET" id="searchForm" class="flex flex-col md:flex-row gap-4">
-        <div class="header-search" style="margin: 0; flex: 1; max-width: none;">
-            <i data-lucide="search" style="cursor: pointer;" onclick="this.closest('form').submit()"></i>
-            <input type="text" name="search" id="searchInput" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by title or author..." oninput="handleSearchInput(this)">
+    <form method="GET" id="searchForm" class="flex flex-col md:flex-row gap-4 items-center">
+        <div class="header-search w-full md:flex-1 m-0 max-w-none relative">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 cursor-pointer" onclick="this.closest('form').submit()"></i>
+            <input 
+                type="text" 
+                name="search" 
+                id="searchInput" 
+                value="<?php echo htmlspecialchars($search); ?>" 
+                placeholder="Search by title or author..." 
+                class="pl-10 block w-full rounded-md border border-gray-300 bg-white py-2 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                oninput="handleSearchInput(this)"
+            >
         </div>
-        <div class="flex items-center gap-2">
-            <i data-lucide="filter" class="text-gray-400" style="width: 18px;"></i>
-            <select name="category" class="form-control" style="width: 200px;" onchange="this.form.submit()">
-                <option value="All">All Categories</option>
-                <?php foreach ($cats as $cat): ?>
-                    <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo $filter === $cat ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($cat); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <div class="w-full md:w-auto">
+            <details class="group relative w-full md:w-[220px]">
+                <summary class="flex items-center justify-between w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 list-none">
+                    <span class="truncate">
+                        <?php echo $filter && $filter !== 'All' ? htmlspecialchars($filter) : 'All Categories'; ?>
+                    </span>
+                    <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180"></i>
+                </summary>
+                <div class="absolute right-0 z-10 mt-1 w-full max-h-60 overflow-y-auto min-w-[220px] origin-top-right rounded-md border border-gray-200 bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <a 
+                        href="?<?php echo http_build_query(array_merge($_GET, ['category' => 'All'])); ?>"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <?php echo !$filter || $filter === 'All' ? 'bg-gray-50 font-medium text-indigo-600' : ''; ?>"
+                    >
+                        All Categories
+                    </a>
+                    <?php foreach ($cats as $cat): ?>
+                        <a 
+                            href="?<?php echo http_build_query(array_merge($_GET, ['category' => $cat])); ?>"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <?php echo $filter === $cat ? 'bg-gray-50 font-medium text-indigo-600' : ''; ?>"
+                        >
+                            <?php echo htmlspecialchars($cat); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </details>
         </div>
     </form>
 </div>
 
 <script>
+let searchTimeout;
 function handleSearchInput(input) {
-    // If search is cleared, submit form to reload all books with current filter
-    if (input.value.trim() === '') {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
         input.form.submit();
-    }
+    }, 500);
 }
 </script>
 
@@ -121,3 +146,15 @@ function handleSearchInput(input) {
 </div>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+<script>
+    // Close details dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            if (detail.hasAttribute('open') && !detail.contains(e.target)) {
+                detail.removeAttribute('open');
+            }
+        });
+    });
+</script>

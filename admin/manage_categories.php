@@ -66,21 +66,41 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'deleted') {
 $itemsPerPage = 10;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $itemsPerPage;
+$search = $_GET['search'] ?? '';
+
+// Build Base Query
+$baseQuery = "FROM categories c LEFT JOIN books b ON c.category_id = b.category_id";
+$whereClause = "";
+$params = [];
+
+if (!empty($search)) {
+    $whereClause = " WHERE c.category_name LIKE :search";
+    $params[':search'] = "%$search%";
+}
 
 // Get total count
-$totalStmt = $pdo->query("SELECT COUNT(*) FROM categories");
+$totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT c.category_id) $baseQuery $whereClause");
+foreach ($params as $key => $value) {
+    $totalStmt->bindValue($key, $value);
+}
+$totalStmt->execute();
 $totalCategories = $totalStmt->fetchColumn();
 $totalPages = ceil($totalCategories / $itemsPerPage);
 
 // Fetch categories with pagination
-$stmt = $pdo->prepare("
+$query = "
     SELECT c.category_id, c.category_name, COUNT(b.book_id) as book_count
-    FROM categories c
-    LEFT JOIN books b ON c.category_id = b.category_id
+    $baseQuery
+    $whereClause
     GROUP BY c.category_id, c.category_name
     ORDER BY c.category_name ASC
     LIMIT :limit OFFSET :offset
-");
+";
+
+$stmt = $pdo->prepare($query);
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
+}
 $stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
@@ -109,18 +129,20 @@ include __DIR__ . '/../includes/header.php';
 <!-- Add Category Form -->
 <div class="mb-6 rounded-md border border-gray-200 bg-white p-6 shadow-sm">
     <h2 class="mb-4 text-lg font-semibold text-gray-900">Add New Category</h2>
-    <form method="POST" class="flex gap-2">
+    <form method="POST" class="flex flex-col sm:flex-row gap-2">
         <input type="hidden" name="action" value="add_category">
-        <input
-            type="text"
-            name="category_name"
-            placeholder="Enter category name"
-            required
-            class="block flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-        >
+        <div class="flex-1">
+            <input
+                type="text"
+                name="category_name"
+                placeholder="Enter category name"
+                required
+                class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
+        </div>
         <button
             type="submit"
-            class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors w-full sm:w-auto"
         >
             <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
             Add Category
@@ -130,21 +152,25 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="rounded-md border border-gray-200 bg-white shadow-sm">
     <div class="border-b border-gray-200 px-6 py-4">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 class="text-lg font-semibold text-gray-900">
                 All Categories (<?php echo $totalCategories; ?>)
                 <?php if ($totalPages > 1): ?>
                     <span class="text-sm font-normal text-gray-500">- Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
                 <?php endif; ?>
             </h2>
-            <div class="relative">
-                <input
-                    type="text"
-                    id="searchCategories"
-                    placeholder="Search categories..."
-                    class="block w-64 rounded-md border border-gray-300 px-3 py-2 pl-10 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                >
-                <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+            <div class="relative w-full sm:w-auto">
+                <form method="GET" action="" class="relative">
+                    <input
+                        type="text"
+                        name="search"
+                        value="<?php echo htmlspecialchars($search); ?>"
+                        id="searchCategories"
+                        placeholder="Search categories..."
+                        class="block w-full sm:w-64 rounded-md border border-gray-300 px-3 py-2 pl-10 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
+                    <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+                </form>
             </div>
         </div>
     </div>
@@ -155,38 +181,40 @@ include __DIR__ . '/../includes/header.php';
             <p class="mt-2 text-sm text-gray-500">No categories found. Add your first category above.</p>
         </div>
     <?php else: ?>
-        <table class="w-full">
-            <thead>
-                <tr class="bg-gray-50">
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Category Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Books</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                <?php foreach ($categories as $category): ?>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                            <?php echo htmlspecialchars($category['category_name']); ?>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-500">
-                            <?php echo $category['book_count']; ?> book(s)
-                        </td>
-                        <td class="px-6 py-4 text-right text-sm">
-                            <button
-                                type="button"
-                                onclick="confirmDeleteCategory(<?php echo $category['category_id']; ?>)"
-                                class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400"
-                                <?php echo $category['book_count'] > 0 ? 'disabled title="Cannot delete category in use"' : ''; ?>
-                            >
-                                <i data-lucide="trash-2" class="h-4 w-4"></i>
-                                Delete
-                            </button>
-                        </td>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Category Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Books</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <?php foreach ($categories as $category): ?>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                <?php echo htmlspecialchars($category['category_name']); ?>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                <?php echo $category['book_count']; ?> book(s)
+                            </td>
+                            <td class="px-6 py-4 text-right text-sm whitespace-nowrap">
+                                <button
+                                    type="button"
+                                    onclick="confirmDeleteCategory(<?php echo $category['category_id']; ?>)"
+                                    class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400"
+                                    <?php echo $category['book_count'] > 0 ? 'disabled title="Cannot delete category in use"' : ''; ?>
+                                >
+                                    <i data-lucide="trash-2" class="h-4 w-4"></i>
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -200,18 +228,12 @@ if ($totalPages > 1) {
 
 <script>
 // Search functionality
+let searchTimeout;
 document.getElementById('searchCategories')?.addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll('tbody tr');
-    
-    rows.forEach(row => {
-        const categoryName = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
-        if (categoryName.includes(searchTerm)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        e.target.closest('form').submit();
+    }, 500);
 });
 
 function confirmDeleteCategory(categoryId) {

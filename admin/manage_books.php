@@ -128,6 +128,9 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Real-time Search Script -->
+<script>
+    window.categoriesData = <?php echo json_encode($categories); ?>;
+</script>
 <script src="<?php echo asset('js/book-catalog-search.js'); ?>?v=<?php echo time(); ?>"></script>
 
 <div class="mb-6 flex items-center justify-between">
@@ -163,17 +166,26 @@ include __DIR__ . '/../includes/header.php';
                 class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
             >
         </div>
-        <select
-            name="category"
-            class="block w-full max-w-xs rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-        >
-            <option value="All">All Categories</option>
-            <?php foreach ($categories as $cat): ?>
-                <option value="<?php echo htmlspecialchars($cat['category_name']); ?>" <?php echo $filter === $cat['category_name'] ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($cat['category_name']); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+        
+        <div class="relative w-full md:max-w-xs">
+            <input type="hidden" name="category" id="category_hidden" value="<?php echo htmlspecialchars($filter === 'All' ? '' : $filter); ?>">
+            <div class="relative">
+                 <input
+                    type="text"
+                    id="category_search"
+                    placeholder="All Categories"
+                    autocomplete="off"
+                    value="<?php echo htmlspecialchars($filter === 'All' ? '' : $filter); ?>"
+                    class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                >
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                </div>
+            </div>
+            <div id="category_dropdown" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                <!-- Categories will be populated here -->
+            </div>
+        </div>
     </form>
 </div>
 
@@ -187,19 +199,19 @@ include __DIR__ . '/../includes/header.php';
     <?php foreach ($books as $book): ?>
         <div class="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
             
-            <div class="flex-grow">
+            <div class="flex-grow min-w-0">
                 <h3
                     class="mb-1 truncate text-lg font-bold text-gray-900"
                     title="<?php echo htmlspecialchars($book['title']); ?>"
                 >
                     <?php echo htmlspecialchars($book['title']); ?>
                 </h3>
-                <p class="mb-2 text-sm italic text-gray-600">
+                <p class="mb-2 text-sm italic text-gray-600 truncate" title="<?php echo htmlspecialchars($book['authors']); ?>">
                     <?php echo htmlspecialchars($book['authors']); ?>
                 </p>
                 <div class="flex justify-between items-center text-xs text-gray-500 mb-2">
-                    <span class="font-mono">ISBN: <?php echo htmlspecialchars($book['isbn']); ?></span>
-                    <span class="font-semibold <?php echo $book['available_copies'] > 0 ? 'text-green-600' : 'text-red-600'; ?>">
+                    <span class="font-mono truncate mr-2" title="ISBN: <?php echo htmlspecialchars($book['isbn']); ?>">ISBN: <?php echo htmlspecialchars($book['isbn']); ?></span>
+                    <span class="font-semibold whitespace-nowrap <?php echo $book['available_copies'] > 0 ? 'text-green-600' : 'text-red-600'; ?>">
                         Stock: <?php echo $book['available_copies'] . '/' . $book['total_copies']; ?>
                     </span>
                 </div>
