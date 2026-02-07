@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['username'] = $username;
                     $_SESSION['role_id'] = $role_id;
                     
-                    redirect(url('index.php'));
+                    redirect(url('/'));
 
                 } catch (Exception $e) {
                     $pdo->rollBack();
