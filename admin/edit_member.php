@@ -2,6 +2,7 @@
 // admin/edit_member.php
 require_once __DIR__ . '/../config/db_config.php';
 require_once __DIR__ . '/../includes/auth_middleware.php';
+require_once __DIR__ . '/../includes/validation_helper.php';
 
 requireRole('admin');
 
@@ -20,17 +21,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
     if ($action === 'update_details') {
-        $fullName = trim($_POST['full_name']);
-        $email = trim($_POST['email']);
-        $phone = trim($_POST['phone']);
+        $fullName = sanitizeInput($_POST['full_name']);
+        $email = sanitizeInput($_POST['email']);
+        $phone = sanitizeInput($_POST['phone']);
         
+        $emailValidation = validateEmail($email);
+        $phoneValidation = validatePhone($phone);
+
         if (empty($fullName) || empty($email)) {
             $error = "Name and Email are required.";
+        } elseif ($emailValidation !== true) {
+            $error = $emailValidation;
+        } elseif ($phoneValidation !== true) {
+            $error = $phoneValidation;
         } else {
             try {
-                $stmt = $pdo->prepare("UPDATE members SET full_name = ?, email = ?, phone_number = ? WHERE member_id = ?");
-                $stmt->execute([$fullName, $email, $phone, $memberId]);
-                $success = "Member details updated.";
+                // Check for duplicate email (excluding current member)
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM members WHERE email = ? AND member_id != ?");
+                $stmt->execute([$email, $memberId]);
+                if ($stmt->fetchColumn() > 0) {
+                     $error = "This email is already registered by another member.";
+                } else {
+                    $stmt = $pdo->prepare("UPDATE members SET full_name = ?, email = ?, phone_number = ? WHERE member_id = ?");
+                    $stmt->execute([$fullName, $email, $phone, $memberId]);
+                    $success = "Member details updated.";
+                }
             } catch (PDOException $e) {
                 $error = "Error updating details: " . $e->getMessage();
             }
