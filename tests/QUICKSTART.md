@@ -5,7 +5,7 @@
 ### Step 1: Install Dependencies
 
 ```bash
-cd e:\xampp\htdocs\lib_system\library_system\tests
+cd e:\xampp\htdocs\LibraryHub\tests
 npm install
 npx playwright install
 ```
@@ -13,7 +13,7 @@ npx playwright install
 ### Step 2: Verify XAMPP is Running
 
 - Start Apache from XAMPP Control Panel
-- Verify: http://localhost/lib_system/library_system is accessible
+- Verify: http://localhost/LibraryHub is accessible
 - Ensure you have an admin account (username: `admin`, password: `admin123`)
 
 ### Step 3: Run Tests

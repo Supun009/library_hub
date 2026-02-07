@@ -11,7 +11,9 @@ A modern, full-featured Library Management System built with PHP, MySQL, and Tai
 ### 📖 Book Management
 
 - **Add New Books** - Add books with multiple authors support
-- **Book Catalog** - Browse books with grid layout and pagination (12 books per page)
+- **Manage Books** - Browse, search, edit, and delete books with grid layout
+- **Edit Books** - Update book details (except stock quantity)
+- **Soft Delete** - Safely remove books without losing transaction history
 - **Advanced Search** - Search by title, ISBN, or author
 - **Category Filtering** - Filter books by categories
 - **Status Tracking** - Real-time availability status (Available/Issued)
@@ -72,28 +74,29 @@ A modern, full-featured Library Management System built with PHP, MySQL, and Tai
 ## 📁 Project Structure
 
 ```
-library_system/
+LibraryHub/
 ├── admin/                      # Admin panel pages
-│   ├── add_book.php           # Add new books with multiple authors
-│   ├── dashboard.php          # Admin dashboard with statistics
-│   ├── edit_member.php        # Edit member information
-│   ├── issue_book.php         # Issue multiple books at once
-│   ├── manage_books.php       # Book catalog with pagination
-│   ├── manage_members.php     # Member management with filters
-│   ├── profile.php            # Admin profile management
-│   ├── return_book.php        # Return multiple books at once
-│   ├── search.php             # Advanced search functionality
-│   └── transactions.php       # Transaction history with filters
+│   ├── add_book.php           # Route: /admin/books/add - Add new books
+│   ├── dashboard.php          # Route: /admin/dashboard - Admin dashboard
+│   ├── edit_book.php          # Route: /admin/books/edit - Edit book
+│   ├── edit_member.php        # Route: /admin/members/edit - Edit member
+│   ├── issue_book.php         # Route: /admin/issue - Issue books
+│   ├── manage_books.php       # Route: /admin/books - Book management
+│   ├── manage_members.php     # Route: /admin/members - Member management
+│   ├── profile.php            # Route: /admin/profile - Admin profile
+│   ├── return_book.php        # Route: /admin/return - Return books
+│   ├── search.php             # Route: /admin/search - Advanced search
+│   └── transactions.php       # Route: /admin/transactions - History
 │
 ├── auth/                       # Authentication pages
-│   ├── login.php              # User login
-│   ├── logout.php             # User logout
-│   └── register.php           # New user registration
+│   ├── login.php              # Route: /login
+│   ├── logout.php             # Route: /logout
+│   └── register.php           # Route: /signup
 │
 ├── member/                     # Member portal pages
-│   ├── dashboard.php          # Member dashboard
-│   ├── my_books.php           # Member's borrowed books
-│   └── profile.php            # Member profile management
+│   ├── dashboard.php          # Route: /member - Member dashboard
+│   ├── my_books.php           # Route: /member/loans - Borrowed books
+│   └── profile.php            # Route: /member/profile - Member profile
 │
 ├── config/                     # Configuration files
 │   └── db_config.php          # Database connection settings
@@ -109,8 +112,7 @@ library_system/
 │   └── css/
 │       └── style.css          # Custom styles and Tailwind config
 │
-├── migration_*.php            # Database migration files
-├── schema.sql                 # Database schema
+├── schema_migration.sql       # Database schema
 ├── index.php                  # Landing page
 ├── .gitignore                 # Git ignore file
 └── README.md                  # This file
@@ -207,7 +209,7 @@ library_system/
 3. **Create Database**
    - Open phpMyAdmin: `http://localhost/phpmyadmin`
    - Create a new database named `library_db`
-   - Import `schema.sql` file
+   - Import `schema_migration.sql` file
 
 4. **Configure Database Connection**
    - Open `config/db_config.php`
@@ -221,9 +223,9 @@ library_system/
 
 5. **Run Migrations** (if needed)
    - Visit migration files in browser to run them:
-     - `http://localhost/lib_system/library_system/migration_member_status.php`
-     - `http://localhost/lib_system/library_system/migration_add_due_date.php`
-     - `http://localhost/lib_system/library_system/migration_profile.php`
+     - `http://localhost/LibraryHub/migration_member_status.php`
+     - `http://localhost/LibraryHub/migration_add_due_date.php`
+     - `http://localhost/LibraryHub/migration_profile.php`
 
 6. **Create Admin User**
    - Register a new user via `auth/register.php`
@@ -233,9 +235,9 @@ library_system/
      ```
 
 7. **Access the Application**
-   - **Landing Page**: `http://localhost/lib_system/library_system/`
-   - **Login**: `http://localhost/lib_system/library_system/auth/login.php`
-   - **Admin Dashboard**: `http://localhost/lib_system/library_system/admin/dashboard.php`
+   - **Landing Page**: `http://localhost/LibraryHub/`
+   - **Login**: `http://localhost/LibraryHub/login`
+   - **Admin Dashboard**: `http://localhost/LibraryHub/admin/dashboard`
 
 ## 🎯 Usage Guide
 
@@ -243,11 +245,12 @@ library_system/
 
 #### Managing Books
 
-1. Navigate to **Book Catalog**
+1. Navigate to **Manage Books**
 2. Click **Add New Book** to add books
-3. Add multiple authors per book
-4. Search and filter books by category
-5. Use pagination to browse large catalogs
+3. Use the **Edit** button to update book details
+4. Use the **Delete** button to remove books (Soft Delete)
+   - Books with active loans cannot be deleted
+5. Search and filter books by category
 
 #### Managing Members
 
