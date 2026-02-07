@@ -213,7 +213,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="<?php echo asset('js/issue-book-search.js'); ?>"></script>
+<script src="<?php echo asset('js/issue-book-search.js'); ?>?v=<?php echo time(); ?>"></script>
 <script>
 // Initialize search functionality when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

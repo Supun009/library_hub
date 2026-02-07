@@ -135,7 +135,7 @@ function initBookSearch() {
  * Fetch books from server via AJAX
  */
 function fetchBooks(searchTerm, bookDropdown) {
-  fetch(`ajax_search_books.php?q=${encodeURIComponent(searchTerm)}`)
+  fetch(`ajax/search-books?q=${encodeURIComponent(searchTerm)}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");

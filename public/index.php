@@ -72,6 +72,8 @@ $router->post('/admin/profile', function() { require __DIR__ . '/../admin/profil
 // AJAX Routes
 $router->post('/admin/ajax/add-author', function() { require __DIR__ . '/../admin/ajax_add_author.php'; });
 $router->post('/admin/ajax/add-category', function() { require __DIR__ . '/../admin/ajax_add_category.php'; });
+$router->get('/admin/ajax/search-books', function() { require __DIR__ . '/../admin/ajax_search_books.php'; });
+$router->get('/admin/ajax/search-books', function() { require __DIR__ . '/../admin/ajax_search_books.php'; });
 
 // Categories and Authors Management
 $router->get('/admin/categories', function() { require __DIR__ . '/../admin/manage_categories.php'; });
