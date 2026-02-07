@@ -66,21 +66,41 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'deleted') {
 $itemsPerPage = 10;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $itemsPerPage;
+$search = $_GET['search'] ?? '';
+
+// Build Base Query
+$baseQuery = "FROM categories c LEFT JOIN books b ON c.category_id = b.category_id";
+$whereClause = "";
+$params = [];
+
+if (!empty($search)) {
+    $whereClause = " WHERE c.category_name LIKE :search";
+    $params[':search'] = "%$search%";
+}
 
 // Get total count
-$totalStmt = $pdo->query("SELECT COUNT(*) FROM categories");
+$totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT c.category_id) $baseQuery $whereClause");
+foreach ($params as $key => $value) {
+    $totalStmt->bindValue($key, $value);
+}
+$totalStmt->execute();
 $totalCategories = $totalStmt->fetchColumn();
 $totalPages = ceil($totalCategories / $itemsPerPage);
 
 // Fetch categories with pagination
-$stmt = $pdo->prepare("
+$query = "
     SELECT c.category_id, c.category_name, COUNT(b.book_id) as book_count
-    FROM categories c
-    LEFT JOIN books b ON c.category_id = b.category_id
+    $baseQuery
+    $whereClause
     GROUP BY c.category_id, c.category_name
     ORDER BY c.category_name ASC
     LIMIT :limit OFFSET :offset
-");
+";
+
+$stmt = $pdo->prepare($query);
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
+}
 $stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
@@ -140,13 +160,17 @@ include __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
             </h2>
             <div class="relative w-full sm:w-auto">
-                <input
-                    type="text"
-                    id="searchCategories"
-                    placeholder="Search categories..."
-                    class="block w-full sm:w-64 rounded-md border border-gray-300 px-3 py-2 pl-10 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                >
-                <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+                <form method="GET" action="" class="relative">
+                    <input
+                        type="text"
+                        name="search"
+                        value="<?php echo htmlspecialchars($search); ?>"
+                        id="searchCategories"
+                        placeholder="Search categories..."
+                        class="block w-full sm:w-64 rounded-md border border-gray-300 px-3 py-2 pl-10 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
+                    <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+                </form>
             </div>
         </div>
     </div>
@@ -204,18 +228,12 @@ if ($totalPages > 1) {
 
 <script>
 // Search functionality
+let searchTimeout;
 document.getElementById('searchCategories')?.addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll('tbody tr');
-    
-    rows.forEach(row => {
-        const categoryName = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
-        if (categoryName.includes(searchTerm)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        e.target.closest('form').submit();
+    }, 500);
 });
 
 function confirmDeleteCategory(categoryId) {
