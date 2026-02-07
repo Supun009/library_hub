@@ -106,22 +106,22 @@ $transactions = $stmt->fetchAll();
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
         <h1 class="page-heading">Detailed Transactions</h1>
         <p class="text-sm text-gray-600">View and manage all borrowing history</p>
     </div>
-    <div class="flex gap-2">
+    <div class="flex gap-2 w-full sm:w-auto">
         <a
             href="<?php echo url('admin/issue'); ?>"
-            class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
         >
             <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
             Issue Book
         </a>
         <a
             href="<?php echo url('admin/return'); ?>"
-            class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
         >
             <i data-lucide="arrow-down-left" class="h-4 w-4"></i>
             Return Book
@@ -137,8 +137,8 @@ include __DIR__ . '/../includes/header.php';
 
 <!-- Search & Sort -->
 <div class="mb-6 rounded-md border border-gray-200 bg-white p-4 shadow-sm">
-    <form method="GET" class="flex flex-wrap items-center gap-4">
-        <div class="relative min-w-[220px] flex-1">
+    <form method="GET" class="flex flex-col sm:flex-row flex-wrap items-center gap-4">
+        <div class="relative w-full sm:flex-1 min-w-[200px]">
             <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
             <input
                 type="text"
@@ -149,28 +149,59 @@ include __DIR__ . '/../includes/header.php';
             >
         </div>
         
-        <select
-            name="status"
-            onchange="this.form.submit()"
-            class="block w-full max-w-[150px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-        >
-            <option value="Active" <?php echo $statusFilter === 'Active' ? 'selected' : ''; ?>>Active (Issued)</option>
-            <option value="Overdue" <?php echo $statusFilter === 'Overdue' ? 'selected' : ''; ?>>Overdue</option>
-            <option value="Returned" <?php echo $statusFilter === 'Returned' ? 'selected' : ''; ?>>Returned</option>
-            <option value="All" <?php echo $statusFilter === 'All' ? 'selected' : ''; ?>>All History</option>
-        </select>
+        <div class="grid grid-cols-2 sm:flex sm:flex-row gap-2 w-full sm:w-auto">
+            <!-- Status Dropdown -->
+            <div class="relative w-full sm:w-auto">
+                <details class="group relative w-full sm:w-[150px]">
+                    <summary class="flex items-center justify-between w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 list-none">
+                        <span class="truncate">
+                            <?php 
+                                $statusLabels = [
+                                    'Active' => 'Active',
+                                    'Overdue' => 'Overdue',
+                                    'Returned' => 'Returned',
+                                    'All' => 'All History'
+                                ];
+                                echo $statusLabels[$statusFilter] ?? 'Active';
+                            ?>
+                        </span>
+                        <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="absolute right-0 z-10 mt-1 w-full min-w-[150px] origin-top-right rounded-md border border-gray-200 bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <?php foreach ($statusLabels as $val => $label): ?>
+                            <a 
+                                href="?<?php echo http_build_query(array_merge($_GET, ['status' => $val, 'page' => 1])); ?>"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <?php echo $statusFilter === $val ? 'bg-gray-50 font-medium text-indigo-600' : ''; ?>"
+                            >
+                                <?php echo $label; ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </details>
+            </div>
 
-        <select
-            name="sort"
-            onchange="this.form.submit()"
-            class="block w-full max-w-[220px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-        >
-            <?php foreach ($validSorts as $val => $label): ?>
-                <option value="<?php echo $val; ?>" <?php echo $sort === $val ? 'selected' : ''; ?>>
-                    <?php echo $label; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+            <!-- Sort Dropdown -->
+            <div class="relative w-full sm:w-auto">
+                <details class="group relative w-full sm:w-[220px]">
+                    <summary class="flex items-center justify-between w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 list-none">
+                        <span class="truncate">
+                            <?php echo $validSorts[$sort] ?? 'Date (Newest)'; ?>
+                        </span>
+                        <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="absolute right-0 z-10 mt-1 w-full min-w-[220px] origin-top-right rounded-md border border-gray-200 bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <?php foreach ($validSorts as $val => $label): ?>
+                            <a 
+                                href="?<?php echo http_build_query(array_merge($_GET, ['sort' => $val])); ?>"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <?php echo $sort === $val ? 'bg-gray-50 font-medium text-indigo-600' : ''; ?>"
+                            >
+                                <?php echo $label; ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </details>
+            </div>
+        </div>
     </form>
 </div>
 
@@ -181,16 +212,16 @@ include __DIR__ . '/../includes/header.php';
         <p class="text-gray-500 text-sm mt-1">Total: <?php echo $totalItems; ?> transaction(s)</p>
     </div>
     <div class="overflow-x-auto">
-        <table>
+        <table class="w-full">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Member</th>
-                    <th>Book</th>
-                    <th>Issue Date</th>
-                    <th>Due Date</th>
-                    <th>Return Date</th>
-                    <th>Status</th>
+                    <th class="whitespace-nowrap">ID</th>
+                    <th class="whitespace-nowrap">Member</th>
+                    <th class="whitespace-nowrap">Book</th>
+                    <th class="whitespace-nowrap">Issue Date</th>
+                    <th class="whitespace-nowrap">Due Date</th>
+                    <th class="whitespace-nowrap">Return Date</th>
+                    <th class="whitespace-nowrap">Status</th>
                     <!-- <th>Actions</th> -->
                 </tr>
             </thead>
@@ -202,36 +233,25 @@ include __DIR__ . '/../includes/header.php';
                             $status = $t['return_date'] ? 'Returned' : ($isOverdue ? 'Overdue' : 'Issued');
                             $statusClass = $t['return_date'] ? 'badge-green' : ($isOverdue ? 'badge-red' : 'badge-blue');
                         ?>
-                        <tr>
-                            <td class="text-gray-500"><?php echo $t['issue_id']; ?></td>
-                            <td class="font-medium"><?php echo htmlspecialchars($t['full_name']); ?></td>
-                            <td>
-                                <p class="text-sm text-gray-900"><?php echo htmlspecialchars($t['title']); ?></p>
+                        <tr class="hover:bg-gray-50">
+                            <td class="text-gray-500 whitespace-nowrap px-4 py-3"><?php echo $t['issue_id']; ?></td>
+                            <td class="font-medium whitespace-nowrap px-4 py-3"><?php echo htmlspecialchars($t['full_name']); ?></td>
+                            <td class="min-w-[200px] px-4 py-3">
+                                <p class="text-sm text-gray-900 truncate" title="<?php echo htmlspecialchars($t['title']); ?>"><?php echo htmlspecialchars($t['title']); ?></p>
                                 <p class="text-xs text-gray-500"><?php echo htmlspecialchars($t['isbn']); ?></p>
                             </td>
-                            <td><?php echo $t['issue_date']; ?></td>
-                            <td>
+                            <td class="whitespace-nowrap px-4 py-3"><?php echo $t['issue_date']; ?></td>
+                            <td class="whitespace-nowrap px-4 py-3">
                                 <span class="<?php echo $isOverdue ? 'text-red-600 font-semibold' : ''; ?>">
                                     <?php echo $t['due_date']; ?>
                                 </span>
                             </td>
-                            <td><?php echo $t['return_date'] ? $t['return_date'] : '-'; ?></td>
-                            <td>
+                            <td class="whitespace-nowrap px-4 py-3"><?php echo $t['return_date'] ? $t['return_date'] : '-'; ?></td>
+                            <td class="whitespace-nowrap px-4 py-3">
                                 <span class="badge <?php echo $statusClass; ?>">
                                     <?php echo $status; ?>
                                 </span>
                             </td>
-                            <!-- <td>
-                                <?php if (!$t['return_date']): ?>
-                                    <a
-                                        href="<?php echo url('admin/return?id=' . $t['issue_id']); ?>"
-                                        title="Return Book"
-                                        class="inline-flex items-center justify-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
-                                    >
-                                        <i data-lucide="corner-down-left" class="h-4 w-4"></i>
-                                    </a>
-                                <?php endif; ?>
-                            </td> -->
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -253,3 +273,15 @@ renderPagination($currentPage, $totalItems, $itemsPerPage, [
 ?>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+<script>
+    // Close details dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            if (detail.hasAttribute('open') && !detail.contains(e.target)) {
+                detail.removeAttribute('open');
+            }
+        });
+    });
+</script>
