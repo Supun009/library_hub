@@ -49,11 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         } else {
             $stmt = $pdo->prepare("DELETE FROM authors WHERE author_id = ?");
             $stmt->execute([$authorId]);
-            $success = "Author deleted successfully!";
+            // Redirect to prevent form resubmission and clear state
+            redirect('admin/authors?msg=deleted');
         }
     } catch (PDOException $e) {
         $error = "Error: " . $e->getMessage();
     }
+}
+
+// Check for success message
+if (isset($_GET['msg']) && $_GET['msg'] === 'deleted') {
+    $success = "Author deleted successfully!";
 }
 
 // Pagination settings
@@ -167,18 +173,15 @@ include __DIR__ . '/../includes/header.php';
                             <?php echo $author['book_count']; ?> book(s)
                         </td>
                         <td class="px-6 py-4 text-right text-sm">
-                            <form method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this author?');">
-                                <input type="hidden" name="action" value="delete_author">
-                                <input type="hidden" name="author_id" value="<?php echo $author['author_id']; ?>">
-                                <button
-                                    type="submit"
-                                    class="inline-flex items-center gap-1 text-red-600 hover:text-red-800"
-                                    <?php echo $author['book_count'] > 0 ? 'disabled title="Cannot delete author in use"' : ''; ?>
-                                >
-                                    <i data-lucide="trash-2" class="h-4 w-4"></i>
-                                    Delete
-                                </button>
-                            </form>
+                            <button
+                                type="button"
+                                onclick="confirmDeleteAuthor(<?php echo $author['author_id']; ?>)"
+                                class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400"
+                                <?php echo $author['book_count'] > 0 ? 'disabled title="Cannot delete author in use"' : ''; ?>
+                            >
+                                <i data-lucide="trash-2" class="h-4 w-4"></i>
+                                Delete
+                            </button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -210,6 +213,33 @@ document.getElementById('searchAuthors')?.addEventListener('input', function(e) 
         }
     });
 });
+
+function confirmDeleteAuthor(authorId) {
+    openDeleteModal(function() {
+        // Create a temporary form to submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = window.location.href;
+        
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'delete_author';
+        
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'author_id';
+        idInput.value = authorId;
+        
+        form.appendChild(actionInput);
+        form.appendChild(idInput);
+        document.body.appendChild(form);
+        form.submit();
+    });
+}
 </script>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+<?php 
+include __DIR__ . '/../includes/delete_modal.php';
+include __DIR__ . '/../includes/footer.php'; 
+?>

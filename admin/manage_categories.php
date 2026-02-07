@@ -49,11 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         } else {
             $stmt = $pdo->prepare("DELETE FROM categories WHERE category_id = ?");
             $stmt->execute([$categoryId]);
-            $success = "Category deleted successfully!";
+            // Redirect to avoid resubmission
+            redirect('admin/categories?msg=deleted');
         }
     } catch (PDOException $e) {
         $error = "Error: " . $e->getMessage();
     }
+}
+
+// Check for success message
+if (isset($_GET['msg']) && $_GET['msg'] === 'deleted') {
+    $success = "Category deleted successfully!";
 }
 
 // Pagination settings
@@ -167,18 +173,15 @@ include __DIR__ . '/../includes/header.php';
                             <?php echo $category['book_count']; ?> book(s)
                         </td>
                         <td class="px-6 py-4 text-right text-sm">
-                            <form method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
-                                <input type="hidden" name="action" value="delete_category">
-                                <input type="hidden" name="category_id" value="<?php echo $category['category_id']; ?>">
-                                <button
-                                    type="submit"
-                                    class="inline-flex items-center gap-1 text-red-600 hover:text-red-800"
-                                    <?php echo $category['book_count'] > 0 ? 'disabled title="Cannot delete category in use"' : ''; ?>
-                                >
-                                    <i data-lucide="trash-2" class="h-4 w-4"></i>
-                                    Delete
-                                </button>
-                            </form>
+                            <button
+                                type="button"
+                                onclick="confirmDeleteCategory(<?php echo $category['category_id']; ?>)"
+                                class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400"
+                                <?php echo $category['book_count'] > 0 ? 'disabled title="Cannot delete category in use"' : ''; ?>
+                            >
+                                <i data-lucide="trash-2" class="h-4 w-4"></i>
+                                Delete
+                            </button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -210,6 +213,32 @@ document.getElementById('searchCategories')?.addEventListener('input', function(
         }
     });
 });
+
+function confirmDeleteCategory(categoryId) {
+    openDeleteModal(function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = window.location.href;
+        
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'delete_category';
+        
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'category_id';
+        idInput.value = categoryId;
+        
+        form.appendChild(actionInput);
+        form.appendChild(idInput);
+        document.body.appendChild(form);
+        form.submit();
+    });
+}
 </script>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+<?php 
+include __DIR__ . '/../includes/delete_modal.php';
+include __DIR__ . '/../includes/footer.php'; 
+?>
