@@ -134,23 +134,28 @@ include __DIR__ . '/../includes/header.php';
             </div>
 
             <!-- Publication Year -->
-            <div>
+            <div class="relative">
                 <label class="mb-1 block text-sm font-medium text-gray-700">Publication Year</label>
-                <select
-                    name="publication_year"
-                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                <input
+                    type="text"
+                    id="publication_year_display"
+                    placeholder="Select Year"
+                    readonly
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 cursor-pointer bg-white"
+                    onclick="toggleYearDropdown(event)"
+                    value="<?php echo htmlspecialchars($_POST['publication_year'] ?? ''); ?>"
                 >
-                    <option value="">Select Year</option>
+                <input type="hidden" name="publication_year" id="publication_year" value="<?php echo htmlspecialchars($_POST['publication_year'] ?? ''); ?>">
+                
+                <div id="year_dropdown_container" class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     <?php
                     $currentYear = date('Y');
-                    $selectedYear = $_POST['publication_year'] ?? '';
-                    // Range: Next year down to 1950
-                    for ($year = $currentYear + 1; $year >= 1950; $year--) {
-                        $selected = ($year == $selectedYear) ? 'selected' : '';
-                        echo "<option value=\"$year\" $selected>$year</option>";
+                    // Range: Next year down to 1900
+                    for ($year = $currentYear + 1; $year >= 1900; $year--) {
+                        echo "<div class='cursor-pointer px-3 py-2 hover:bg-gray-100 text-sm' onclick=\"selectYear('$year')\">$year</div>";
                     }
                     ?>
-                </select>
+                </div>
             </div>
 
             <!-- Stock / Copies -->
@@ -224,6 +229,27 @@ include __DIR__ . '/../includes/header.php';
 // Initialize data for external script
 window.authorsData = <?php echo json_encode($authors); ?>;
 window.categoriesData = <?php echo json_encode($categories); ?>;
+
+// Custom Year Dropdown Logic
+function toggleYearDropdown(e) {
+    e.stopPropagation();
+    const container = document.getElementById('year_dropdown_container');
+    container.classList.toggle('hidden');
+}
+
+function selectYear(year) {
+    document.getElementById('publication_year').value = year;
+    document.getElementById('publication_year_display').value = year;
+    document.getElementById('year_dropdown_container').classList.add('hidden');
+}
+
+document.addEventListener('click', function(e) {
+    const container = document.getElementById('year_dropdown_container');
+    const input = document.getElementById('publication_year_display');
+    if (container && !container.contains(e.target) && e.target !== input) {
+        container.classList.add('hidden');
+    }
+});
 </script>
 <script src="<?php echo url('admin/js/add_book.js'); ?>"></script>
 
