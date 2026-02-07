@@ -12,7 +12,7 @@ function isLoggedIn() {
 // Function to enforce login
 function requireLogin() {
     if (!isLoggedIn()) {
-        redirect(authUrl('login.php'));
+        redirect('login');
     }
 }
 
@@ -36,9 +36,9 @@ function requireRole($role) {
     if (!hasRole($role)) {
         // Redirect to their appropriate dashboard if they have the wrong role
         if (hasRole('admin')) {
-            redirect(adminUrl('dashboard.php'));
+            redirect(adminUrl('dashboard'));
         } else {
-            redirect(memberUrl('index.php'));
+            redirect(memberUrl('/'));
         }
     }
 }
