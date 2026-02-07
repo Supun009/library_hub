@@ -38,6 +38,10 @@ if ($hasSearched) {
     $conditions = [];
     $params = [];
 
+    // Exclude deleted books
+    $conditions[] = "b.deleted_at IS NULL";
+    $conditions[] = "s.status_name != 'Deleted'";
+
     if (!empty($filters['title'])) {
         $conditions[] = "b.title LIKE ?";
         $params[] = "%" . $filters['title'] . "%";

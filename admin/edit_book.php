@@ -49,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $isbn = trim($_POST['isbn']);
     $categoryId = $_POST['category_id'] ?? '';
     $pubYear = $_POST['publication_year'] ?? NULL;
-    $totalCopies = (int)($_POST['total_copies'] ?? 1);
     
     // Author IDs - Expecting an array of author IDs
     $authorIds = $_POST['author_ids'] ?? [];
@@ -58,8 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $error = "Title, ISBN, Category, and at least one Author are required.";
     } elseif (!empty($pubYear) && (!is_numeric($pubYear) || $pubYear < 1000 || $pubYear > date('Y') + 1)) {
         $error = "Please enter a valid publication year (1000-" . (date('Y') + 1) . ").";
-    } elseif ($totalCopies < 1) {
-        $error = "Number of copies must be at least 1.";
     } else {
         try {
             // Check for duplicate ISBN (excluding current book)
@@ -70,37 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } else {
                 $pdo->beginTransaction();
 
-                // Calculate difference in copies to adjust available copies
-                $copyDiff = $totalCopies - $book['total_copies'];
-                $newAvailable = $book['available_copies'] + $copyDiff;
-                
-                if ($newAvailable < 0) {
-                    throw new Exception("Cannot reduce total copies below currently rented amount.");
-                }
-
-                // Update Status if stock changes (e.g. if we add stock to an out-of-stock book)
-                // If new available > 0, set to Available. If 0, depends on logic, but usually Available if > 0.
-                // Assuming status logic: if avail > 0 then Available, else Out of Stock?
-                // The DB has status_id. Let's get "Available" ID.
-                $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Available'");
-                $availStatusId = $stmt->fetchColumn();
-                // Get "Out of Stock" ID just in case
-                $stmt = $pdo->query("SELECT status_id FROM status WHERE status_name = 'Out of Stock'");
-                $oosStatusId = $stmt->fetchColumn(); 
-                if (!$oosStatusId) {
-                     $pdo->exec("INSERT INTO status (status_name) VALUES ('Out of Stock')");
-                     $oosStatusId = $pdo->lastInsertId();
-                }
-
-                $newStatusId = ($newAvailable > 0) ? $availStatusId : $oosStatusId;
-
                 // Update Book
                 $stmt = $pdo->prepare("
                     UPDATE books 
-                    SET title = ?, isbn = ?, category_id = ?, status_id = ?, publication_year = ?, total_copies = ?, available_copies = ?
+                    SET title = ?, isbn = ?, category_id = ?, publication_year = ?
                     WHERE book_id = ?
                 ");
-                $stmt->execute([$title, $isbn, $categoryId, $newStatusId, $pubYear ?: NULL, $totalCopies, $newAvailable, $bookId]);
+                $stmt->execute([$title, $isbn, $categoryId, $pubYear ?: NULL, $bookId]);
 
                 // Update Authors: Sync strategy (Delete all, Insert new)
                 $pdo->prepare("DELETE FROM book_authors WHERE book_id = ?")->execute([$bookId]);
@@ -209,14 +182,14 @@ include __DIR__ . '/../includes/header.php';
 
             <!-- Stock / Copies -->
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Number of Copies *</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Number of Copies</label>
                 <input
                     type="number"
                     name="total_copies"
-                    required
-                    min="1"
-                    value="<?php echo htmlspecialchars($_POST['total_copies'] ?? $book['total_copies']); ?>"
-                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    readonly
+                    disabled
+                    value="<?php echo htmlspecialchars($book['total_copies']); ?>"
+                    class="block w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-sm shadow-sm cursor-not-allowed focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
                 <p class="mt-1 text-xs text-gray-500">Currently Available: <?php echo $book['available_copies']; ?></p>
             </div>
