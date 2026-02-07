@@ -46,6 +46,9 @@ function validatePassword($password) {
     if (strlen($password) < 6) {
         return "Password must be at least 6 characters long.";
     }
+    if (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+        return "Password must include uppercase, lowercase letters, and numbers.";
+    }
     return true;
 }
 
