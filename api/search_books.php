@@ -21,6 +21,7 @@ try {
         LEFT JOIN status s ON b.status_id = s.status_id
         LEFT JOIN book_authors ba ON b.book_id = ba.book_id
         LEFT JOIN authors a ON ba.author_id = a.author_id
+        WHERE b.deleted_at IS NULL AND s.status_name != 'Deleted'
     ";
     
     $conditions = [];
@@ -40,7 +41,7 @@ try {
     
     $whereClause = '';
     if (count($conditions) > 0) {
-        $whereClause = " WHERE " . implode(" AND ", $conditions);
+        $whereClause = " AND " . implode(" AND ", $conditions);
     }
     
     // Count total books

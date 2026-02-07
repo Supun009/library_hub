@@ -110,7 +110,7 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="mb-1 text-2xl font-semibold text-gray-900">Issue History</h1>
+        <h1 class="page-heading">Issue History</h1>
         <p class="text-sm text-gray-600">
             All borrowing records for <span class="font-medium text-gray-900"><?php echo htmlspecialchars($member['full_name']); ?></span>
         </p>

@@ -47,6 +47,9 @@ $router->post('/admin/books', function() { require __DIR__ . '/admin/manage_book
 $router->get('/admin/books/add', function() { require __DIR__ . '/admin/add_book.php'; });
 $router->post('/admin/books/add', function() { require __DIR__ . '/admin/add_book.php'; });
 
+$router->get('/admin/books/edit', function() { require __DIR__ . '/admin/edit_book.php'; });
+$router->post('/admin/books/edit', function() { require __DIR__ . '/admin/edit_book.php'; });
+
 $router->get('/admin/members', function() { require __DIR__ . '/admin/manage_members.php'; });
 $router->post('/admin/members', function() { require __DIR__ . '/admin/manage_members.php'; });
 

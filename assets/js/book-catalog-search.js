@@ -106,16 +106,21 @@ document.addEventListener("DOMContentLoaded", function () {
                     </span>
                 </div>
                 
-                <button
-                    class="inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors ${
-                      book.status_name === "Available"
-                        ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                        : "cursor-not-allowed bg-gray-100 text-gray-400"
-                    }"
-                    ${book.status_name === "Available" ? "" : "disabled"}
-                >
-                    ${book.status_name === "Available" ? book.status_name : "Not Available"}
-                </button>
+                <div class="mt-4 flex gap-2">
+                    <a href="${window.url("admin/books/edit?id=" + book.book_id)}" 
+                       class="flex-1 inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i data-lucide="edit" class="mr-2 h-4 w-4"></i>
+                        Edit
+                    </a>
+                    <button 
+                        onclick="confirmDeleteBook(${book.book_id})"
+                        class="flex-1 inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        ${book.available_copies < book.total_copies ? 'disabled title="Cannot delete book with active loans"' : ""}
+                    >
+                        <i data-lucide="trash-2" class="mr-2 h-4 w-4"></i>
+                        Delete
+                    </button>
+                </div>
             </div>
         `,
       )

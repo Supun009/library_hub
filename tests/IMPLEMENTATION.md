@@ -63,7 +63,7 @@ tests/
 ### Base URL
 
 ```
-http://localhost/lib_system/library_system
+http://localhost/LibraryHub
 ```
 
 ### Default Admin Credentials
@@ -142,7 +142,7 @@ npm run test:e2e:report
 
 2. Test Phase (member-management.spec.js)
    └─> Load authenticated state
-   └─> Navigate to manage_members.php
+   └─> Navigate to /admin/members
    └─> Execute test scenarios
    └─> Generate unique test data
    └─> Assert results

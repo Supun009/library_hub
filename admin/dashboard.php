@@ -44,7 +44,7 @@ try {
 ?>
 
 <div class="mb-6">
-    <h1 class="mb-1 text-2xl font-semibold text-gray-900">Dashboard</h1>
+    <h1 class="page-heading">Dashboard</h1>
     <p class="text-sm text-gray-600">Welcome back! Here's what's happening today.</p>
 </div>
 

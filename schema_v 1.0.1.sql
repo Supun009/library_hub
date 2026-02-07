@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS status (
 );
 
 -- Seed Statuses
-INSERT INTO status (status_name) VALUES ('Available'), ('Issued'), ('Lost'), ('Damaged')
+INSERT INTO status (status_name) VALUES ('Available'), ('Issued'), ('Lost'), ('Damaged'), ('Deleted')
 ON DUPLICATE KEY UPDATE status_name=status_name;
 
 -- 7. Books Table
@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS books (
     available_copies INT NOT NULL DEFAULT 1,
     category_id INT,
     status_id INT,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,

@@ -5,7 +5,7 @@ This directory contains end-to-end tests for the Library Management System using
 ## Prerequisites
 
 - **XAMPP/Apache running** on `http://localhost`
-- **Library System** accessible at `http://localhost/lib_system/library_system`
+- **Library System** accessible at `http://localhost/LibraryHub`
 - **Admin account** with credentials (default: `admin` / `admin123`)
 - **Node.js** (v16 or higher)
 
@@ -104,7 +104,7 @@ tests/
 The base URL is configured in `playwright.config.js`:
 
 ```javascript
-baseURL: "http://localhost/lib_system/library_system";
+baseURL: "http://localhost/LibraryHub";
 ```
 
 ### Timeouts
@@ -135,7 +135,7 @@ Tests use a shared authentication state saved in `.auth/admin.json` to avoid log
 
 - Verify admin credentials in `e2e/auth.setup.js`
 - Ensure the admin user exists in the database
-- Check that login redirects to `/admin/dashboard.php`
+- Check that login redirects to `/admin/dashboard`
 
 ### Tests timeout
 

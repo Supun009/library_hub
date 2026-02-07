@@ -52,7 +52,7 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6">
-    <h1 class="text-2xl text-gray-900 mb-1">Book Catalog</h1>
+    <h1 class="page-heading">Book Catalog</h1>
     <p class="text-gray-600">Browse and search available books</p>
 </div>
 
