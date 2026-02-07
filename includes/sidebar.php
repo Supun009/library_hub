@@ -1,5 +1,7 @@
 <!-- includes/sidebar.php -->
 <?php
+$config = require __DIR__ . '/../config/app_config.php';
+
 // Determine current route for active state highlighting
 $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $basePath = parse_url(getBaseUrl(), PHP_URL_PATH);
@@ -29,7 +31,7 @@ function isActive($pattern, $currentRoute) {
 ?>
 <aside class="sidebar">
     <div class="sidebar-header">
-        <h1 class="text-xl font-semibold text-indigo-700">LibraryHub</h1>
+        <h1 class="text-xl font-semibold text-indigo-700"><?php echo $config['app_name'] ?? 'LibraryHub'; ?></h1>
     </div>
     <ul class="sidebar-nav">
         <?php if (hasRole('admin')): ?>

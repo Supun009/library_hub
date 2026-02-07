@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../config/db_config.php';
 require_once __DIR__ . '/../includes/auth_middleware.php';
 require_once __DIR__ . '/../includes/validation_helper.php';
+$config = require __DIR__ . '/../config/app_config.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
@@ -45,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Library System</title>
+    <title>Login - <?php echo $config['app_name'] ?? 'LibraryHub'; ?></title>
 
     <!-- Tailwind CSS (step 1: add alongside existing styles, do not remove old CSS yet) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="auth-body">
     <div class="auth-container">
         <div class="mb-6 text-center">
-            <h1 class="text-2xl font-semibold text-gray-900">Library Portal</h1>
+            <h1 class="text-2xl font-semibold text-gray-900"><?php echo $config['app_name'] ?? 'LibraryHub'; ?></h1>
             <p class="mt-1 text-sm text-gray-500">Sign in to your account</p>
         </div>
 

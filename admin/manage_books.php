@@ -21,7 +21,7 @@ $categories = $pdo->query("SELECT category_id, category_name FROM categories ORD
 $search = $_GET['search'] ?? '';
 $filter = $_GET['category'] ?? '';
 $currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$itemsPerPage = 12; // 12 books per page works well for grid layout
+$itemsPerPage = 12; 
 $offset = ($currentPage - 1) * $itemsPerPage;
 
 // Build base query
@@ -87,7 +87,7 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Real-time Search Script -->
-<script src="/lib_system/library_system/assets/js/book-catalog-search.js"></script>
+<script src="<?php echo asset('js/book-catalog-search.js'); ?>"></script>
 
 <div class="mb-6 flex items-center justify-between">
     <div>
