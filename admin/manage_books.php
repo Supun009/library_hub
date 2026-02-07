@@ -128,7 +128,7 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Real-time Search Script -->
-<script src="<?php echo asset('js/book-catalog-search.js'); ?>"></script>
+<script src="<?php echo asset('js/book-catalog-search.js'); ?>?v=<?php echo time(); ?>"></script>
 
 <div class="mb-6 flex items-center justify-between">
     <div>

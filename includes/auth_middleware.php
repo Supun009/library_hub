@@ -11,8 +11,13 @@ function isLoggedIn() {
 
 // Function to enforce login
 function requireLogin() {
+    // Prevent caching
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Cache-Control: post-check=0, pre-check=0", false);
+    header("Pragma: no-cache");
+
     if (!isLoggedIn()) {
-        redirect(authUrl('login.php'));
+        redirect('login');
     }
 }
 
@@ -36,9 +41,9 @@ function requireRole($role) {
     if (!hasRole($role)) {
         // Redirect to their appropriate dashboard if they have the wrong role
         if (hasRole('admin')) {
-            redirect(adminUrl('dashboard.php'));
+            redirect(adminUrl('dashboard'));
         } else {
-            redirect(memberUrl('index.php'));
+            redirect('member');
         }
     }
 }

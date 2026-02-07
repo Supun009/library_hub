@@ -6,9 +6,10 @@
  * @param int $totalItems Total number of items
  * @param int $itemsPerPage Number of items per page
  * @param array $queryParams Additional query parameters to preserve (e.g., search, status)
+ * @param string $pageParamName Name of the page parameter (default: 'page')
  * @return void Outputs the pagination HTML
  */
-function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams = []) {
+function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams = [], $pageParamName = 'page') {
     // Ensure all numeric parameters are integers to prevent type errors
     $currentPage = (int) $currentPage;
     $totalItems = (int) $totalItems;
@@ -32,7 +33,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
     // Build query string from additional parameters
     $queryString = '';
     foreach ($queryParams as $key => $value) {
-        if (!empty($value) && $key !== 'page') {
+        if (!empty($value) && $key !== $pageParamName && $key !== 'page') {
             $queryString .= '&' . urlencode($key) . '=' . urlencode($value);
         }
     }
@@ -49,7 +50,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
             <!-- Mobile pagination -->
             <?php if ($currentPage > 1): ?>
                 <a
-                    href="?page=<?php echo $currentPage - 1; ?><?php echo $queryString; ?>"
+                    href="?<?php echo urlencode($pageParamName); ?>=<?php echo $currentPage - 1; ?><?php echo $queryString; ?>"
                     class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                     Previous
@@ -62,7 +63,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
             
             <?php if ($currentPage < $totalPages): ?>
                 <a
-                    href="?page=<?php echo $currentPage + 1; ?><?php echo $queryString; ?>"
+                    href="?<?php echo urlencode($pageParamName); ?>=<?php echo $currentPage + 1; ?><?php echo $queryString; ?>"
                     class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                     Next
@@ -91,7 +92,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
                     <!-- Previous Button -->
                     <?php if ($currentPage > 1): ?>
                         <a
-                            href="?page=<?php echo $currentPage - 1; ?><?php echo $queryString; ?>"
+                            href="?<?php echo urlencode($pageParamName); ?>=<?php echo $currentPage - 1; ?><?php echo $queryString; ?>"
                             class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20"
                         >
                             <span class="sr-only">Previous</span>
@@ -106,7 +107,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
                     <!-- First page -->
                     <?php if ($startPage > 1): ?>
                         <a
-                            href="?page=1<?php echo $queryString; ?>"
+                            href="?<?php echo urlencode($pageParamName); ?>=1<?php echo $queryString; ?>"
                             class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20"
                         >
                             1
@@ -129,7 +130,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
                             </span>
                         <?php else: ?>
                             <a
-                                href="?page=<?php echo $i; ?><?php echo $queryString; ?>"
+                                href="?<?php echo urlencode($pageParamName); ?>=<?php echo $i; ?><?php echo $queryString; ?>"
                                 class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20"
                             >
                                 <?php echo $i; ?>
@@ -145,7 +146,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
                             </span>
                         <?php endif; ?>
                         <a
-                            href="?page=<?php echo $totalPages; ?><?php echo $queryString; ?>"
+                            href="?<?php echo urlencode($pageParamName); ?>=<?php echo $totalPages; ?><?php echo $queryString; ?>"
                             class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20"
                         >
                             <?php echo $totalPages; ?>
@@ -155,7 +156,7 @@ function renderPagination($currentPage, $totalItems, $itemsPerPage, $queryParams
                     <!-- Next Button -->
                     <?php if ($currentPage < $totalPages): ?>
                         <a
-                            href="?page=<?php echo $currentPage + 1; ?><?php echo $queryString; ?>"
+                            href="?<?php echo urlencode($pageParamName); ?>=<?php echo $currentPage + 1; ?><?php echo $queryString; ?>"
                             class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20"
                         >
                             <span class="sr-only">Next</span>

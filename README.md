@@ -223,21 +223,20 @@ LibraryHub/
 
 5. **Run Migrations** (if needed)
    - Visit migration files in browser to run them:
-     - `http://localhost/LibraryHub/migration_member_status.php`
-     - `http://localhost/LibraryHub/migration_add_due_date.php`
-     - `http://localhost/LibraryHub/migration_profile.php`
+     - `http://localhost/<folder_path>/<migration_name>.php`
+     -
 
 6. **Create Admin User**
-   - Register a new user via `auth/register.php`
+   - Register a new user via `/signup`
    - Manually update the role in database:
      ```sql
-     UPDATE users SET role_id = 1 WHERE username = 'admin';
+     UPDATE users SET role_id = 1 WHERE username = 'your_username';
      ```
 
 7. **Access the Application**
-   - **Landing Page**: `http://localhost/LibraryHub/`
-   - **Login**: `http://localhost/LibraryHub/login`
-   - **Admin Dashboard**: `http://localhost/LibraryHub/admin/dashboard`
+   - **Landing Page**: `http://localhost/<folder_path>/`
+   - **Login**: `http://localhost/<folder_path>/login`
+   - **Admin Dashboard**: `http://localhost/<folder_path>/admin/dashboard`
 
 ## 🎯 Usage Guide
 

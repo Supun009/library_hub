@@ -17,13 +17,12 @@ $currentRoute = '/' . ltrim($currentRoute, '/');
 
 // Helper to check active state - now accepts current route as parameter
 function isActive($pattern, $currentRoute) {
-    // Special case for member home - exact match only
+    // Special case for member home - ignore trailing slash
     if ($pattern === '/member') {
-        return $currentRoute === '/member' || $currentRoute === '/member/';
+        return rtrim($currentRoute, '/') === '/member';
     }
     
     // For all other routes: exact match OR starts with pattern
-    // This handles both /admin/search and /admin/books/add matching /admin/books
     $result = $currentRoute === $pattern || strpos($currentRoute, $pattern) === 0;
     
     return $result;

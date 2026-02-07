@@ -2,6 +2,7 @@
 // admin/manage_members.php
 require_once __DIR__ . '/../config/db_config.php';
 require_once __DIR__ . '/../includes/auth_middleware.php';
+require_once __DIR__ . '/../includes/validation_helper.php';
 
 requireRole('admin');
 
@@ -11,16 +12,33 @@ $success = '';
 
 // Handle Add Member Form
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_member') {
-    $fullName = trim($_POST['full_name']);
-    $email = trim($_POST['email']);
-    $username = trim($_POST['username']); // We'll double as student ID/username
+    $fullName = sanitizeInput($_POST['full_name']);
+    $email = sanitizeInput($_POST['email']);
+    $username = sanitizeInput($_POST['username']); // We'll double as student ID/username
     $password = $_POST['password'];
+
+    $usernameValidation = validateUsername($username);
+    $emailValidation = validateEmail($email);
+    $passwordValidation = validatePassword($password);
 
     if (empty($fullName) || empty($email) || empty($username) || empty($password)) {
         $error = "All fields are required.";
+    } elseif ($usernameValidation !== true) {
+        $error = $usernameValidation;
+    } elseif ($emailValidation !== true) {
+        $error = $emailValidation;
+    } elseif ($passwordValidation !== true) {
+        $error = $passwordValidation;
     } else {
         try {
             $pdo->beginTransaction();
+
+            // Check for duplicate email before proceeding (username/email uniqueness handled by DB constraints but good to check)
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM members WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetchColumn() > 0) {
+                 throw new Exception("Email already registered.");
+            }
 
             // 1. Create User
             $hashedPwd = password_hash($password, PASSWORD_DEFAULT);
@@ -34,12 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             $pdo->commit();
             $success = "Member registered successfully.";
-        } catch (PDOException $e) {
+        } catch (Exception $e) { // Catch Exception to include our custom throw
             $pdo->rollBack();
-            if ($e->errorInfo[1] == 1062) {
+            if ($e instanceof PDOException && $e->errorInfo[1] == 1062) {
                 $error = "Username or Email already exists.";
             } else {
-                $error = "Database Error: " . $e->getMessage();
+                $error = "Error: " . $e->getMessage();
             }
         }
     }

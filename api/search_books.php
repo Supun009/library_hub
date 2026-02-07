@@ -1,7 +1,7 @@
 <?php
 // api/search_books.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 requireLogin();
 
@@ -52,7 +52,7 @@ try {
     
     // Fetch books
     $query = "
-        SELECT b.book_id, b.title, b.isbn, c.category_name, s.status_name,
+        SELECT b.book_id, b.title, b.isbn, b.total_copies, b.available_copies, c.category_name, s.status_name,
                GROUP_CONCAT(DISTINCT a.name SEPARATOR ', ') as authors
         " . $baseQuery . $whereClause . "
         GROUP BY b.book_id 

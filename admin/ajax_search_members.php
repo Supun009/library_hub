@@ -1,5 +1,5 @@
 <?php
-// admin/ajax_search_books.php
+// admin/ajax_search_members.php
 require_once __DIR__ . '/../config/db_config.php';
 require_once __DIR__ . '/../includes/auth_middleware.php';
 
@@ -15,21 +15,23 @@ if (strlen($searchTerm) < 2) {
 }
 
 try {
-    // Search for available books by title or ISBN
+    // Search for active members by name or username
     $stmt = $pdo->prepare("
-        SELECT b.book_id, b.title, b.isbn
-        FROM books b
-        WHERE b.status_id = (SELECT status_id FROM status WHERE status_name = 'Available')
-          AND (b.title LIKE :search OR b.isbn LIKE :search)
-        ORDER BY b.title
+        SELECT m.member_id, m.full_name, u.username as uid,
+               (SELECT COUNT(*) FROM issues WHERE member_id = m.member_id AND return_date IS NULL) as issued_books_count
+        FROM members m
+        JOIN users u ON m.user_id = u.user_id
+        WHERE m.status = 'active'
+          AND (m.full_name LIKE :search OR u.username LIKE :search)
+        ORDER BY m.full_name
         LIMIT 10
     ");
     
     $searchParam = '%' . $searchTerm . '%';
     $stmt->execute(['search' => $searchParam]);
-    $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    echo json_encode($books);
+    echo json_encode($members);
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Database error']);

@@ -2,6 +2,7 @@
 // admin/profile.php
 require_once __DIR__ . '/../config/db_config.php';
 require_once __DIR__ . '/../includes/auth_middleware.php';
+require_once __DIR__ . '/../includes/validation_helper.php';
 
 requireRole('admin');
 
@@ -45,7 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newPwd = $_POST['new_password'];
         $confirmPwd = $_POST['confirm_password'];
         
-        if ($newPwd !== $confirmPwd) {
+        $validation = validatePassword($newPwd);
+        if ($validation !== true) {
+            $message = $validation;
+            $messageType = "error";
+        } elseif ($newPwd !== $confirmPwd) {
             $message = "New passwords do not match.";
             $messageType = "error";
         } else {

@@ -45,8 +45,26 @@ function generateDuplicateUsernameData(existingUsername) {
   };
 }
 
+/**
+ * Generate unique book data
+ * @returns {Object} Test data for book creation
+ */
+function generateBookData() {
+  const timestamp = Date.now();
+  const randomSuffix = Math.floor(Math.random() * 10000); // 4 digits
+
+  return {
+    title: `Test Book ${timestamp}`,
+    // valid ISBN-13 format not strictly enforced by regex in PHP (just unique check), but let's make it look real
+    isbn: `978-${Math.floor(100000000 + Math.random() * 900000000)}-${Math.floor(Math.random() * 10)}`,
+    publicationYear: (2000 + Math.floor(Math.random() * 23)).toString(), // 2000-2023
+    copies: 5,
+  };
+}
+
 module.exports = {
   generateUniqueMemberData,
   generateInvalidMemberData,
   generateDuplicateUsernameData,
+  generateBookData,
 };

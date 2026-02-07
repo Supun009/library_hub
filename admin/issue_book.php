@@ -68,9 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $stmt->execute([$bookId]);
 
                         // 3. Update Status if Out of Stock
-                        // We check if available_copies is 0 *after* the decrement.
-                        // However, simpler to just set status based on the new value.
-                        // Or better: UPDATE books SET status_id = CASE WHEN available_copies = 0 THEN ? ELSE status_id END WHERE book_id = ?
                         $stmt = $pdo->prepare("UPDATE books SET status_id = ? WHERE book_id = ? AND available_copies = 0");
                         $stmt->execute([$issuedStatusId, $bookId]);
                     }
@@ -89,17 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
     }
 }
-
-// Fetch Lists - Only active members
-$members = $pdo->query("
-    SELECT m.member_id, m.full_name, m.status,
-           (SELECT username FROM users WHERE users.user_id = m.user_id) as uid,
-           (SELECT COUNT(*) FROM issues WHERE member_id = m.member_id AND return_date IS NULL) as issued_books_count
-    FROM members m
-    WHERE m.status = 'active'
-    ORDER BY m.full_name
-")->fetchAll();
-
 
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -213,13 +199,11 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<script src="../assets/js/issue-book-search.js"></script>
+<script src="<?php echo asset('js/issue-book-search.js'); ?>?v=<?php echo time(); ?>"></script>
 <script>
 // Initialize search functionality when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    const members = <?php echo json_encode($members); ?>;
-    
-    initIssueBookSearch(members);
+    initIssueBookSearch();
 });
 </script>
 

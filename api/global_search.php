@@ -1,7 +1,7 @@
 <?php
 // api/global_search.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 // Ensure user is logged in
 requireLogin();
@@ -40,6 +40,13 @@ if (strlen($query) >= 2) {
         $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         foreach ($books as $book) {
+            // Determine URL based on user role
+            if (hasRole('admin')) {
+                $searchUrl = adminUrl('books?search=' . urlencode($book['title']));
+            } else {
+                $searchUrl = url('member?search=' . urlencode($book['title']));
+            }
+            
             $results[] = [
                 'type' => 'book',
                 'id' => $book['book_id'],
@@ -48,7 +55,7 @@ if (strlen($query) >= 2) {
                 'meta' => 'ISBN: ' . $book['isbn'],
                 'status' => $book['status_name'],
                 'category' => $book['category_name'],
-                'url' => adminUrl('manage_books.php?search=' . urlencode($book['isbn']))
+                'url' => $searchUrl
             ];
         }
         

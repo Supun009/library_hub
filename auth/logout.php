@@ -3,5 +3,5 @@
 require_once __DIR__ . '/../includes/url_helper.php';
 session_start();
 session_destroy();
-redirect(authUrl('login.php'));
+redirect('login');
 ?>

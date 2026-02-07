@@ -6,9 +6,9 @@
 let selectedBooks = []; // Array to store selected books
 
 /**
- * Initialize member search functionality
+ * Initialize member search functionality (AJAX)
  */
-function initMemberSearch(members) {
+function initMemberSearch() {
   const memberSearch = document.getElementById("member_search");
   const memberDropdown = document.getElementById("member_dropdown");
   const memberIdHidden = document.getElementById("member_id_hidden");
@@ -16,8 +16,15 @@ function initMemberSearch(members) {
 
   if (!memberSearch) return;
 
+  let searchTimeout;
+
   memberSearch.addEventListener("input", function () {
-    const searchTerm = this.value.toLowerCase();
+    const searchTerm = this.value.trim();
+
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
 
     if (searchTerm.length === 0) {
       memberDropdown.classList.add("hidden");
@@ -26,45 +33,64 @@ function initMemberSearch(members) {
       return;
     }
 
-    const filtered = members.filter(
-      (m) =>
-        m.full_name.toLowerCase().includes(searchTerm) ||
-        m.uid.toLowerCase().includes(searchTerm),
-    );
-
-    if (filtered.length === 0) {
+    if (searchTerm.length < 2) {
       memberDropdown.innerHTML =
-        '<div class="px-3 py-2 text-sm text-gray-500">No members found</div>';
+        '<div class="px-3 py-2 text-sm text-gray-500">Type at least 2 characters to search</div>';
       memberDropdown.classList.remove("hidden");
       return;
     }
 
-    memberDropdown.innerHTML = filtered
-      .map(
-        (m) => `
-            <div class="px-3 py-2 hover:bg-indigo-50 cursor-pointer text-sm member-option" data-id="${m.member_id}" data-name="${escapeHtml(m.full_name)}" data-uid="${escapeHtml(m.uid)}">
-                <div class="font-medium text-gray-900">${escapeHtml(m.full_name)}</div>
-                <div class="text-xs text-gray-500">Username: ${escapeHtml(m.uid)} • Books Issued: ${m.issued_books_count}</div>
-            </div>
-        `,
-      )
-      .join("");
-
+    // Show loading state
+    memberDropdown.innerHTML =
+      '<div class="px-3 py-2 text-sm text-gray-500">Searching...</div>';
     memberDropdown.classList.remove("hidden");
 
-    // Add click handlers
-    document.querySelectorAll(".member-option").forEach((option) => {
-      option.addEventListener("click", function () {
-        const id = this.dataset.id;
-        const name = this.dataset.name;
-        const uid = this.dataset.uid;
+    // Debounce the search
+    searchTimeout = setTimeout(() => {
+      fetch(`ajax/search-members?q=${encodeURIComponent(searchTerm)}`)
+        .then((response) => {
+          if (!response.ok) throw new Error("Network response was not ok");
+          return response.json();
+        })
+        .then((members) => {
+          if (members.length === 0) {
+            memberDropdown.innerHTML =
+              '<div class="px-3 py-2 text-sm text-gray-500">No members found</div>';
+          } else {
+            memberDropdown.innerHTML = members
+              .map(
+                (m) => `
+                <div class="px-3 py-2 hover:bg-indigo-50 cursor-pointer text-sm member-option" data-id="${m.member_id}" data-name="${escapeHtml(m.full_name)}" data-uid="${escapeHtml(m.uid)}">
+                    <div class="font-medium text-gray-900">${escapeHtml(m.full_name)}</div>
+                    <div class="text-xs text-gray-500">Username: ${escapeHtml(m.uid)} • Books Issued: ${m.issued_books_count}</div>
+                </div>
+            `,
+              )
+              .join("");
 
-        memberSearch.value = name;
-        memberIdHidden.value = id;
-        selectedMemberInfo.textContent = `Selected: ${name} (${uid})`;
-        memberDropdown.classList.add("hidden");
-      });
-    });
+            // Add click handlers
+            memberDropdown
+              .querySelectorAll(".member-option")
+              .forEach((option) => {
+                option.addEventListener("click", function () {
+                  const id = this.dataset.id;
+                  const name = this.dataset.name;
+                  const uid = this.dataset.uid;
+
+                  memberSearch.value = name;
+                  memberIdHidden.value = id;
+                  selectedMemberInfo.textContent = `Selected: ${name} (${uid})`;
+                  memberDropdown.classList.add("hidden");
+                });
+              });
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching members:", error);
+          memberDropdown.innerHTML =
+            '<div class="px-3 py-2 text-sm text-red-500">Error loading members</div>';
+        });
+    }, 300);
   });
 
   // Hide dropdown when clicking outside
@@ -135,7 +161,7 @@ function initBookSearch() {
  * Fetch books from server via AJAX
  */
 function fetchBooks(searchTerm, bookDropdown) {
-  fetch(`ajax_search_books.php?q=${encodeURIComponent(searchTerm)}`)
+  fetch(`ajax/search-books?q=${encodeURIComponent(searchTerm)}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -281,9 +307,9 @@ function escapeHtml(text) {
 /**
  * Initialize the issue book search functionality
  */
-function initIssueBookSearch(members) {
+function initIssueBookSearch() {
   // Initialize member search
-  initMemberSearch(members);
+  initMemberSearch();
 
   // Initialize book search (AJAX-based)
   initBookSearch();

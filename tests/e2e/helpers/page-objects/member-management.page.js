@@ -26,7 +26,7 @@ class MemberManagementPage {
    */
   async goto() {
     await this.page.goto(
-      "http://localhost/lib_system/library_system/admin/manage_members.php",
+      "http://localhost/lib_system/library_system/admin/members",
     );
   }
 

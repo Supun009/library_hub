@@ -8,7 +8,7 @@ requireRole('member');
 $pageTitle = 'Browse Catalog';
 
 // Fetch Books
-$search = $_GET['search'] ?? '';
+$search = trim($_GET['search'] ?? '');
 $filter = $_GET['category'] ?? '';
 
 $query = "
@@ -58,10 +58,10 @@ include __DIR__ . '/../includes/header.php';
 
 <!-- Search and Filter -->
 <div class="mb-6 bg-white p-4 rounded shadow-sm border border-gray-200">
-    <form method="GET" class="flex flex-col md:flex-row gap-4">
+    <form method="GET" id="searchForm" class="flex flex-col md:flex-row gap-4">
         <div class="header-search" style="margin: 0; flex: 1; max-width: none;">
-            <i data-lucide="search"></i>
-            <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by title or author...">
+            <i data-lucide="search" style="cursor: pointer;" onclick="this.closest('form').submit()"></i>
+            <input type="text" name="search" id="searchInput" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by title or author..." oninput="handleSearchInput(this)">
         </div>
         <div class="flex items-center gap-2">
             <i data-lucide="filter" class="text-gray-400" style="width: 18px;"></i>
@@ -76,6 +76,15 @@ include __DIR__ . '/../includes/header.php';
         </div>
     </form>
 </div>
+
+<script>
+function handleSearchInput(input) {
+    // If search is cleared, submit form to reload all books with current filter
+    if (input.value.trim() === '') {
+        input.form.submit();
+    }
+}
+</script>
 
 <!-- Books Grid -->
 <div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
