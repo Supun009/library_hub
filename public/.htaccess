@@ -1,0 +1,22 @@
+RewriteEngine On
+
+# Disable Directory Listing
+Options -Indexes
+
+# Block access to dotfiles (like .env, .git)
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Allow access to assets/ directy
+RewriteRule ^assets/ - [L]
+
+# Block access to sensitive directories
+RewriteRule ^(includes|config|migrations|scripts|tests|auth)/ - [F,L]
+
+########
+# Route everything else to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

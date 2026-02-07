@@ -1,9 +1,7 @@
+
+
 RewriteEngine On
 
-# Allow access to assets/ directy
-RewriteRule ^assets/ - [L]
-
-# Route everything else to index.php
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+# force everything to go through public folder
+RewriteCond %{REQUEST_URI} !^/lib_system/library_system/public/
+RewriteRule ^(.*)$ public/$1 [L]
