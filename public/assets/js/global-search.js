@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
             overflow-y: auto;
             z-index: 1000;
             display: none;
+            min-width: 350px;
         `;
 
     searchContainer.style.position = "relative";
@@ -44,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (results.length === 0) {
       dropdown.innerHTML = `
                 <div style="padding: 16px; text-align: center; color: #6b7280;">
-                    <i data-lucide="search" style="width: 24px; height: 24px; margin: 0 auto 8px; opacity: 0.5;"></i>
+                    <i data-lucide="search" style="width: 24px; height: 24px; margin: 0 auto 8px; opacity: 0.5; position: relative; top: auto; left: auto; transform: none; display: block;"></i>
                     <p>No books found</p>
                 </div>
             `;
@@ -60,6 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
       item.style.cssText = `
                 display: flex;
                 align-items: start;
+                gap: 12px;
                 padding: 12px 16px;
                 text-decoration: none;
                 color: inherit;
@@ -68,8 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
 
       item.innerHTML = `
-                <div style="flex-shrink: 0; margin-right: 12px; margin-top: 2px;">
-                    <i data-lucide="book-open" style="width: 20px; height: 20px; color: #6366f1;"></i>
+                <div style="flex-shrink: 0; margin-top: 2px; position: relative;">
+                    <i data-lucide="book-open" style="width: 20px; height: 20px; color: #6366f1; position: relative; top: auto; left: auto; transform: none; display: inline-block;"></i>
                 </div>
                 <div style="flex: 1; min-width: 0;">
                     <div style="font-weight: 600; color: #111827; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -82,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         ${escapeHtml(result.meta)}
                     </div>
                 </div>
-                <div style="flex-shrink: 0; margin-left: 12px;">
+                <div style="flex-shrink: 0;">
                     <span style="display: inline-block; padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; ${
                       result.status === "Available"
                         ? "background-color: #dcfce7; color: #166534;"
