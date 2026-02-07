@@ -32,7 +32,9 @@ You should see tests for:
 
 - ✅ Registering new members
 - ✅ Searching members
-- ✅ Duplicate prevention
+- ✅ Adding new books
+- ✅ Validating book details (ISBN, Title, etc.)
+- ✅ Duplicate prevention (Members & Books)
 - ✅ Form validation
 
 ## 🔧 Customize Admin Credentials
@@ -66,8 +68,8 @@ npx playwright test e2e/member-management.spec.js --debug
 
 ## 📝 Next Steps
 
-1. Review the test code in `e2e/member-management.spec.js`
-2. Check the Page Object in `e2e/helpers/page-objects/member-management.page.js`
+1. Review the test code in `e2e/member-management.spec.js` and `e2e/add-books.spec.js`
+2. Check the Page Objects in `e2e/helpers/page-objects/`
 3. Add your own tests following the same pattern
 4. Read the full README.md for advanced usage
 

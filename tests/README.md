@@ -114,6 +114,16 @@ LibraryHub/
 │
 ├── schema_migration.sql       # Database schema
 ├── index.php                  # Landing page
+├── tests/                      # Testing suite
+│   ├── e2e/                   # End-to-end tests (Playwright)
+│   │   ├── auth.setup.js      # Authentication setup
+│   │   ├── add-books.spec.js  # Book management tests
+│   │   ├── member-management.spec.js # Member management tests
+│   │   └── helpers/           # Test helpers & Page Objects
+│   ├── package.json           # Test dependencies
+│   ├── playwright.config.js   # Playwright configuration
+│   └── QUICKSTART.md          # Testing quick start guide
+│
 ├── .gitignore                 # Git ignore file
 └── README.md                  # This file
 ```
@@ -360,6 +370,37 @@ LibraryHub/
 - **Efficient Joins**: Optimized SQL queries
 - **Reusable Components**: DRY principle
 
+### Reusable Components
+
+- **DRY Principle**: Shared pagination and search logic reduce code duplication.
+
+## 🧪 Testing
+
+The project uses **Playwright** for robust End-to-End (E2E) testing, ensuring critical user flows work as expected.
+
+### Key Test Suites
+
+- **Authentication**: Verifies login/logout and session management.
+- **Member Management**: Tests registration, duplicate prevention, and search functionality.
+- **Book Management**: Validates adding books, ISBN uniqueness, and form inputs.
+
+### Running Tests
+
+Tests are located in the `tests/` directory.
+
+```bash
+# Navigate to tests directory
+cd tests
+
+# Run all tests
+npm run test:e2e
+
+# Run with UI mode
+npm run test:e2e:ui
+```
+
+For detailed instructions, see `tests/QUICKSTART.md`.
+
 ## 📊 Key Features Implementation
 
 ### Pagination Component
@@ -475,4 +516,4 @@ For issues, questions, or contributions:
 
 **Built with ❤️ for efficient library management**
 
-_Last Updated: February 2026_
+_Last Updated: February 7, 2026_
