@@ -23,6 +23,13 @@
         window.url = function(path) {
             return window.baseUrl + '/' + path.replace(/^\//, '');
         };
+
+        // Prevent back button caching (BFCache)
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        };
     </script>
 </head>
 <body>
