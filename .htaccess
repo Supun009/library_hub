@@ -1,17 +1,7 @@
 RewriteEngine On
 
-DirectorySlash Off
+# Forward root requests to public/
+RewriteRule ^$ public/ [L]
 
-# force everything to go through public folder
-RewriteCond %{REQUEST_URI} !^/lib_system/library_system/public/
-RewriteRule ^(.*)$ public/$1 [L]
-
-
-
-#RewriteEngine On
-
-#DirectorySlash Off
-
-# force everything to go through public folder
-#RewriteCond %{REQUEST_URI} !^/library_hub/library_hub/public/
-#RewriteRule ^(.*)$ public/$1 [L]
+# Forward any other requests validation that aren't already pointing to public
+RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
