@@ -1,7 +1,7 @@
 <?php
 // api/global_search.php
-require_once '../config/db_config.php';
-require_once '../includes/auth_middleware.php';
+require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../includes/auth_middleware.php';
 
 // Ensure user is logged in
 requireLogin();

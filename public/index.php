@@ -92,6 +92,9 @@ $router->get('/member', function() { require __DIR__ . '/../member/index.php'; }
 $router->get('/member/loans', function() { require __DIR__ . '/../member/my_loans.php'; });
 $router->get('/member/search', function() { require __DIR__ . '/../member/search.php'; });
 
+// API Routes
+$router->get('/api/search', function() { require __DIR__ . '/../api/global_search.php'; });
+
 /**
  * Dispatch the Request
  * --------------------------------------------------------------------------

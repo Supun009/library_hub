@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    fetch(window.url(`api/global_search.php?q=${encodeURIComponent(query)}`))
+    fetch(window.url(`api/search?q=${encodeURIComponent(query)}`))
       .then((response) => response.json())
       .then((results) => {
         showResults(results);

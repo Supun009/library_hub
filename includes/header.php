@@ -16,7 +16,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Global Search Script -->
-    <script src="<?php echo asset('js/global-search.js'); ?>" defer></script>
+    <script src="<?php echo asset('js/global-search.js'); ?>?v=<?php echo time(); ?>" defer></script>
     <!-- Global URL Helper -->
     <script>
         window.baseUrl = '<?php echo rtrim(getBaseUrl(), '/'); ?>';
