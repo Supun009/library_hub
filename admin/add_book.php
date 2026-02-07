@@ -84,7 +84,7 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-2xl font-semibold text-gray-900 mb-1">Add New Book</h1>
+        <h1 class="page-heading">Add New Book</h1>
         <p class="text-sm text-gray-600">Enter details to add a new book to the catalog.</p>
     </div>
     <a
@@ -136,16 +136,21 @@ include __DIR__ . '/../includes/header.php';
             <!-- Publication Year -->
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">Publication Year</label>
-                <input
-                    type="number"
+                <select
                     name="publication_year"
-                    placeholder="e.g. 2023"
-                    min="1000"
-                    max="<?php echo date('Y') + 1; ?>"
-                    value="<?php echo htmlspecialchars($_POST['publication_year'] ?? ''); ?>"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
-                <p class="mt-1 text-xs text-gray-500">YYYY format (1000 - <?php echo date('Y') + 1; ?>)</p>
+                    <option value="">Select Year</option>
+                    <?php
+                    $currentYear = date('Y');
+                    $selectedYear = $_POST['publication_year'] ?? '';
+                    // Range: Next year down to 1950
+                    for ($year = $currentYear + 1; $year >= 1950; $year--) {
+                        $selected = ($year == $selectedYear) ? 'selected' : '';
+                        echo "<option value=\"$year\" $selected>$year</option>";
+                    }
+                    ?>
+                </select>
             </div>
 
             <!-- Stock / Copies -->

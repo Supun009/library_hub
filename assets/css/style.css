@@ -382,3 +382,12 @@ body.auth-body {
   width: 100%;
   max-width: 400px;
 }
+
+/* Global Page Heading */
+.page-heading {
+  font-size: 1.5rem; /* text-2xl */
+  line-height: 2rem;
+  font-weight: 600; /* font-semibold */
+  color: var(--gray-900); /* text-gray-900 */
+  margin-bottom: 0.25rem; /* mb-1 */
+}

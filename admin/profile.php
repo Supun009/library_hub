@@ -99,7 +99,7 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6">
-    <h1 class="text-2xl text-gray-900 mb-1">Profile & Settings</h1>
+    <h1 class="page-heading">Profile & Settings</h1>
     <p class="text-gray-600">Manage your account and system settings</p>
 </div>
 

@@ -84,7 +84,7 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6">
-    <h1 class="text-2xl font-semibold text-gray-900 mb-1">Manage Authors</h1>
+    <h1 class="page-heading">Manage Authors</h1>
     <p class="text-sm text-gray-600">Add, view, and manage book authors.</p>
 </div>
 

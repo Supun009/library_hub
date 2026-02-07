@@ -118,7 +118,7 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-2xl font-semibold text-gray-900 mb-1">Issue Book</h1>
+        <h1 class="page-heading">Issue Book</h1>
         <p class="text-sm text-gray-600">Issue a book to a member</p>
     </div>
     <a
@@ -131,7 +131,7 @@ include __DIR__ . '/../includes/header.php';
 </div>
 
 <div class="mb-6">
-    <h1 class="text-2xl text-gray-900 mb-1">Return Book</h1>
+    <h1 class="page-heading">Return Book</h1>
     <p class="text-gray-600">Process book returns and fines</p>
 </div>
 

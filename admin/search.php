@@ -94,7 +94,7 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6">
-    <h1 class="mb-1 text-2xl font-semibold text-gray-900">Advanced Search</h1>
+    <h1 class="page-heading">Advanced Search</h1>
     <p class="text-gray-600">Search for books using multiple filters</p>
 </div>
 

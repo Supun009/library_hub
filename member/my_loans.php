@@ -37,7 +37,7 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="mb-6">
-    <h1 class="mb-1 text-2xl font-semibold text-gray-900">My Loans</h1>
+    <h1 class="page-heading">My Loans</h1>
     <p class="text-sm text-gray-600">Track your borrowed books and history</p>
 </div>
 
