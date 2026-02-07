@@ -2,12 +2,97 @@
 document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.querySelector('input[name="search"]');
   const categorySelect = document.querySelector('select[name="category"]');
+  const categoryHidden = document.getElementById("category_hidden");
+  const categorySearchInput = document.getElementById("category_search");
+  const categoryDropdown = document.getElementById("category_dropdown");
+
   const booksGrid = document.querySelector(".grid");
   const totalCountElement = document.querySelector(
     ".text-gray-500.text-sm.mt-1",
   );
   const paginationContainer =
     document.querySelector(".grid").parentElement.nextElementSibling;
+
+  // Initialize Custom Dropdown Logic
+  if (
+    categoryHidden &&
+    categorySearchInput &&
+    categoryDropdown &&
+    window.categoriesData
+  ) {
+    function filterAndShowDropdown() {
+      const searchTerm = categorySearchInput.value.toLowerCase();
+      const filtered = window.categoriesData.filter((c) =>
+        c.category_name.toLowerCase().includes(searchTerm),
+      );
+
+      let html = "";
+
+      // Always show "All Categories" if it matches search or search is empty
+      if ("all categories".includes(searchTerm) || searchTerm === "") {
+        html += `
+                <div class="px-3 py-2 hover:bg-indigo-50 cursor-pointer text-sm category-option font-semibold text-indigo-600" 
+                     data-name="All">
+                    All Categories
+                </div>
+            `;
+      }
+
+      if (filtered.length === 0 && html === "") {
+        html +=
+          '<div class="px-3 py-2 text-sm text-gray-500">No categories found</div>';
+      } else {
+        html += filtered
+          .map(
+            (c) => `
+                <div class="px-3 py-2 hover:bg-indigo-50 cursor-pointer text-sm category-option" 
+                     data-name="${c.category_name}">
+                    ${escapeHtml(c.category_name)}
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      categoryDropdown.innerHTML = html;
+      categoryDropdown.classList.remove("hidden");
+
+      // Add click handlers
+      categoryDropdown
+        .querySelectorAll(".category-option")
+        .forEach((option) => {
+          option.addEventListener("click", function () {
+            const name = this.dataset.name;
+            categoryHidden.value = name;
+            categorySearchInput.value =
+              name === "All" ? "All Categories" : name; // Nice display text
+            categoryDropdown.classList.add("hidden");
+            performSearch(1); // Trigger search
+          });
+        });
+    }
+
+    // Input handler
+    categorySearchInput.addEventListener("input", function () {
+      if (this.value === "") categoryHidden.value = "All"; // Default to All if cleared
+      filterAndShowDropdown();
+    });
+
+    // Focus handler
+    categorySearchInput.addEventListener("focus", function () {
+      filterAndShowDropdown();
+    });
+
+    // Click outside handler
+    document.addEventListener("click", function (e) {
+      if (
+        !categorySearchInput.contains(e.target) &&
+        !categoryDropdown.contains(e.target)
+      ) {
+        categoryDropdown.classList.add("hidden");
+      }
+    });
+  }
 
   if (!searchInput || !booksGrid) return;
 
@@ -17,7 +102,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to perform search
   function performSearch(page = 1) {
     const searchQuery = searchInput.value.trim();
-    const category = categorySelect ? categorySelect.value : "All";
+    let category = "All";
+
+    if (categoryHidden) {
+      category = categoryHidden.value || "All";
+    } else if (categorySelect) {
+      category = categorySelect.value;
+    }
 
     // Build URL with parameters
     const params = new URLSearchParams({
@@ -81,16 +172,25 @@ document.addEventListener("DOMContentLoaded", function () {
       .map(
         (book) => `
             <div class="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-                <div class="flex-grow">
+                <div class="flex-grow min-w-0">
                     <h3 class="mb-1 truncate text-lg font-bold text-gray-900" title="${escapeHtml(book.title)}">
                         ${escapeHtml(book.title)}
                     </h3>
-                    <p class="mb-2 text-sm italic text-gray-600">
+                    <p class="mb-2 text-sm italic text-gray-600 truncate" title="${escapeHtml(book.authors || "No author")}">
                         ${escapeHtml(book.authors || "No author")}
                     </p>
-                    <p class="text-xs font-mono text-gray-400">
-                        ISBN: ${escapeHtml(book.isbn || "N/A")}
-                    </p>
+                    <div class="flex justify-between items-center text-xs text-gray-500 mb-2">
+                        <span class="font-mono truncate mr-2" title="ISBN: ${escapeHtml(book.isbn || "N/A")}">
+                            ISBN: ${escapeHtml(book.isbn || "N/A")}
+                        </span>
+                        <span class="font-semibold whitespace-nowrap ${
+                          book.available_copies > 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }">
+                           Stock: ${book.available_copies}/${book.total_copies}
+                        </span>
+                    </div>
                 </div>
                 
                 <div class="mt-6 mb-4 flex items-center justify-between">

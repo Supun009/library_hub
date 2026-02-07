@@ -97,6 +97,12 @@ if ($hasSearched) {
 include __DIR__ . '/../includes/header.php';
 ?>
 
+<script>
+    // Transform simple array to object array to match JS expectation
+    window.categoriesData = <?php echo json_encode(array_map(function($c) { return ['category_name' => $c]; }, $categories)); ?>;
+</script>
+<script src="<?php echo asset('js/book-catalog-search.js'); ?>?v=<?php echo time(); ?>"></script>
+
 <div class="mb-6">
     <h1 class="page-heading">Advanced Search</h1>
     <p class="text-gray-600">Search for books using multiple filters</p>
@@ -133,17 +139,23 @@ include __DIR__ . '/../includes/header.php';
             <!-- Category -->
             <div>
                 <label class="mb-2 block text-sm font-medium text-gray-700">Category</label>
-                <select
-                    name="category"
-                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                >
-                    <option value="All">All Categories</option>
-                    <?php foreach ($categories as $cat): ?>
-                        <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo $filters['category'] === $cat ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($cat); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <input type="hidden" name="category" id="category_hidden" value="<?php echo htmlspecialchars($filters['category'] === 'All' ? '' : $filters['category']); ?>">
+                <div class="relative">
+                     <input
+                        type="text"
+                        id="category_search"
+                        placeholder="All Categories"
+                        autocomplete="off"
+                        value="<?php echo htmlspecialchars($filters['category'] === 'All' ? '' : $filters['category']); ?>"
+                        class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    >
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                    </div>
+                </div>
+                <div id="category_dropdown" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                    <!-- Categories will be populated here -->
+                </div>
             </div>
 
             <!-- ISBN -->
@@ -260,8 +272,16 @@ include __DIR__ . '/../includes/header.php';
                     <tbody>
                         <?php foreach ($results as $book): ?>
                             <tr>
-                                <td class="font-medium text-gray-900"><?php echo htmlspecialchars($book['title']); ?></td>
-                                <td class="text-gray-900"><?php echo htmlspecialchars($book['authors']); ?></td>
+                                <td class="font-medium text-gray-900">
+                                    <div class="truncate max-w-xs" title="<?php echo htmlspecialchars($book['title']); ?>">
+                                        <?php echo htmlspecialchars($book['title']); ?>
+                                    </div>
+                                </td>
+                                <td class="text-gray-900">
+                                    <div class="truncate max-w-xs" title="<?php echo htmlspecialchars($book['authors']); ?>">
+                                        <?php echo htmlspecialchars($book['authors']); ?>
+                                    </div>
+                                </td>
                                 <td class="text-gray-600"><?php echo htmlspecialchars($book['category_name']); ?></td>
                                 <td class="text-gray-600"><?php echo htmlspecialchars($book['isbn']); ?></td>
                                 <td class="text-gray-600"><?php echo htmlspecialchars($book['publication_year'] ?? 'N/A'); ?></td>
