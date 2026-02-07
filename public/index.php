@@ -94,6 +94,7 @@ $router->get('/member/search', function() { require __DIR__ . '/../member/search
 
 // API Routes
 $router->get('/api/search', function() { require __DIR__ . '/../api/global_search.php'; });
+$router->get('/api/search-books', function() { require __DIR__ . '/../api/search_books.php'; });
 
 /**
  * Dispatch the Request

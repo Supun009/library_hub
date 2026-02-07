@@ -48,7 +48,7 @@ if (strlen($query) >= 2) {
                 'meta' => 'ISBN: ' . $book['isbn'],
                 'status' => $book['status_name'],
                 'category' => $book['category_name'],
-                'url' => adminUrl('manage_books.php?search=' . urlencode($book['isbn']))
+                'url' => adminUrl('books?search=' . urlencode($book['isbn']))
             ];
         }
         

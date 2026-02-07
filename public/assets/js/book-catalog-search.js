@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
     booksGrid.style.opacity = "0.5";
     booksGrid.style.pointerEvents = "none";
 
-    fetch(`/lib_system/library_system/api/search_books.php?${params}`)
+    fetch(window.url(`api/search-books?${params.toString()}`))
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
