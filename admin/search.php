@@ -137,7 +137,7 @@ include __DIR__ . '/../includes/header.php';
             </div>
 
             <!-- Category -->
-            <div>
+            <div class="relative">
                 <label class="mb-2 block text-sm font-medium text-gray-700">Category</label>
                 <input type="hidden" name="category" id="category_hidden" value="<?php echo htmlspecialchars($filters['category'] === 'All' ? '' : $filters['category']); ?>">
                 <div class="relative">
