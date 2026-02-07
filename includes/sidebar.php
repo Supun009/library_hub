@@ -44,7 +44,7 @@ function isActive($pattern, $currentRoute) {
             <li>
                 <a href="<?php echo url('admin/books'); ?>" class="<?php echo isActive('/admin/books', $currentRoute) ? 'active' : ''; ?>">
                     <i data-lucide="book-open"></i>
-                    <span>Book Catalog</span>
+                    <span>Manage Books</span>
                 </a>
             </li>
             <li>

@@ -17,6 +17,13 @@
     
     <!-- Global Search Script -->
     <script src="<?php echo asset('js/global-search.js'); ?>" defer></script>
+    <!-- Global URL Helper -->
+    <script>
+        window.baseUrl = '<?php echo rtrim(getBaseUrl(), '/'); ?>';
+        window.url = function(path) {
+            return window.baseUrl + '/' + path.replace(/^\//, '');
+        };
+    </script>
 </head>
 <body>
     <div class="wrapper">

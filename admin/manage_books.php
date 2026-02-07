@@ -13,6 +13,46 @@ $success = '';
 if (isset($_GET['msg']) && $_GET['msg'] === 'book_added') {
     $success = "Book added successfully.";
 }
+if (isset($_GET['msg']) && $_GET['msg'] === 'book_deleted') {
+    $success = "Book deleted successfully.";
+}
+if (isset($_GET['msg']) && $_GET['msg'] === 'book_updated') {
+    $success = "Book updated successfully.";
+}
+
+// Handle Delete Book
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_book') {
+    $bookId = $_POST['book_id'];
+    try {
+        // Check for active loans in issues table
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM issues WHERE book_id = ? AND return_date IS NULL");
+        $stmt->execute([$bookId]);
+        $activeLoans = $stmt->fetchColumn();
+        
+        if ($activeLoans > 0) {
+            $error = "Cannot delete book. It has active loans.";
+        } else {
+            // Fetch 'Deleted' status ID
+            $stmt = $pdo->prepare("SELECT status_id FROM status WHERE status_name = 'Deleted'");
+            $stmt->execute();
+            $deletedStatusId = $stmt->fetchColumn();
+
+            if ($deletedStatusId) {
+                // Soft Delete the book with status update
+                $stmt = $pdo->prepare("UPDATE books SET deleted_at = NOW(), status_id = ? WHERE book_id = ?");
+                $stmt->execute([$deletedStatusId, $bookId]);
+            } else {
+                // Fallback if status not found (shouldn't happen with correct migration)
+                $stmt = $pdo->prepare("UPDATE books SET deleted_at = NOW() WHERE book_id = ?");
+                $stmt->execute([$bookId]);
+            }
+            
+            redirect('admin/books?msg=book_deleted');
+        }
+    } catch (PDOException $e) {
+        $error = "Error: " . $e->getMessage();
+    }
+}
 
 // Fetch Categories for Filter
 $categories = $pdo->query("SELECT category_id, category_name FROM categories ORDER BY category_name ASC")->fetchAll();
@@ -31,6 +71,7 @@ $baseQuery = "
     LEFT JOIN status s ON b.status_id = s.status_id
     LEFT JOIN book_authors ba ON b.book_id = ba.book_id
     LEFT JOIN authors a ON ba.author_id = a.author_id
+    WHERE b.deleted_at IS NULL AND s.status_name != 'Deleted' 
 ";
 
 $conditions = [];
@@ -50,7 +91,7 @@ if ($filter && $filter !== 'All') {
 
 $whereClause = '';
 if (count($conditions) > 0) {
-    $whereClause = " WHERE " . implode(" AND ", $conditions);
+    $whereClause = " AND " . implode(" AND ", $conditions);
 }
 
 // Count total books for pagination
@@ -91,7 +132,7 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="page-heading">Book Catalog</h1>
+        <h1 class="page-heading">Manage Books</h1>
         <p class="text-sm text-gray-600">Browse and manage library books</p>
     </div>
     <a
@@ -173,14 +214,21 @@ include __DIR__ . '/../includes/header.php';
                 </span>
             </div>
             
-            <button
-                class="inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors <?php echo $book['available_copies'] > 0
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                    : 'cursor-not-allowed bg-gray-100 text-gray-400'; ?>"
-                <?php echo $book['available_copies'] > 0 ? '' : 'disabled'; ?>
-            >
-                <?php echo $book['available_copies'] > 0 ? 'Available (' . $book['available_copies'] . ')' : 'Out of Stock'; ?>
-            </button>
+            <div class="mt-4 flex gap-2">
+                <a href="<?php echo url('admin/books/edit?id=' . $book['book_id']); ?>" 
+                   class="flex-1 inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    <i data-lucide="edit" class="mr-2 h-4 w-4"></i>
+                    Edit
+                </a>
+                <button 
+                    onclick="confirmDeleteBook(<?php echo $book['book_id']; ?>)"
+                    class="flex-1 inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:text-gray-400"
+                    <?php echo ($book['available_copies'] < $book['total_copies']) ? 'disabled title="Cannot delete book with active loans"' : ''; ?>
+                >
+                    <i data-lucide="trash-2" class="mr-2 h-4 w-4"></i>
+                    Delete
+                </button>
+            </div>
             
         </div>
     <?php endforeach; ?>
@@ -195,4 +243,33 @@ renderPagination($currentPage, $totalItems, $itemsPerPage, [
 ]);
 ?>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+
+<script>
+function confirmDeleteBook(bookId) {
+    openDeleteModal(function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = window.location.href;
+        
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'delete_book';
+        
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'book_id';
+        idInput.value = bookId;
+        
+        form.appendChild(actionInput);
+        form.appendChild(idInput);
+        document.body.appendChild(form);
+        form.submit();
+    }, "Delete Book", "Are you sure you want to delete this book? This action cannot be undone.");
+}
+</script>
+
+<?php 
+include __DIR__ . '/../includes/delete_modal.php';
+include __DIR__ . '/../includes/footer.php'; 
+?>

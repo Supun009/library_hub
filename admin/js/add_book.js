@@ -106,8 +106,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Initialize first author row
-  addAuthorRow();
+  // Initialize authors
+  if (window.initialAuthors && window.initialAuthors.length > 0) {
+    window.initialAuthors.forEach((authorId) => {
+      addAuthorRow(authorId);
+    });
+  } else {
+    // Initialize first author row
+    addAuthorRow();
+  }
 
   // Re-initialize Lucide icons
   if (typeof lucide !== "undefined") {
@@ -116,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Add Author Row Function with searchable dropdown
-function addAuthorRow() {
+function addAuthorRow(preSelectedAuthorId = null) {
   authorRowCount++;
   const container = document.getElementById("authors-container");
 
@@ -154,6 +161,17 @@ function addAuthorRow() {
   const authorSearch = newRow.querySelector(".author-search");
   const authorDropdown = newRow.querySelector(".author-dropdown");
   const authorIdHidden = newRow.querySelector(".author-id-hidden");
+
+  // Pre-fill if ID provided
+  if (preSelectedAuthorId) {
+    const author = window.authorsData.find(
+      (a) => a.author_id == preSelectedAuthorId,
+    );
+    if (author) {
+      authorIdHidden.value = author.author_id;
+      authorSearch.value = author.name;
+    }
+  }
 
   // Author search input handler
   authorSearch.addEventListener("input", function () {

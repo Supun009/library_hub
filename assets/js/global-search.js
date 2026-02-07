@@ -126,9 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    fetch(
-      `/lib_system/library_system/api/global_search.php?q=${encodeURIComponent(query)}`,
-    )
+    fetch(window.url(`api/global_search.php?q=${encodeURIComponent(query)}`))
       .then((response) => response.json())
       .then((results) => {
         showResults(results);
@@ -175,7 +173,9 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       const query = this.value.trim();
       if (query) {
-        window.location.href = `/lib_system/library_system/admin/manage_books.php?search=${encodeURIComponent(query)}`;
+        window.location.href = window.url(
+          `admin/books?search=${encodeURIComponent(query)}`,
+        );
       }
     }
   });
