@@ -277,6 +277,6 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
-<script src="<?php echo url('admin/js/add_book.js'); ?>"></script>
+<script src="<?php echo asset('js/admin/add_book.js'); ?>"></script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
