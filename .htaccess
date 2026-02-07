@@ -5,3 +5,13 @@ DirectorySlash Off
 # force everything to go through public folder
 RewriteCond %{REQUEST_URI} !^/lib_system/library_system/public/
 RewriteRule ^(.*)$ public/$1 [L]
+
+
+
+#RewriteEngine On
+
+#DirectorySlash Off
+
+# force everything to go through public folder
+#RewriteCond %{REQUEST_URI} !^/library_hub/library_hub/public/
+#RewriteRule ^(.*)$ public/$1 [L]
