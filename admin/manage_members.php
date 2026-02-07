@@ -177,6 +177,7 @@ include __DIR__ . '/../includes/header.php';
                     name="full_name"
                     data-testid="input-full-name"
                     required
+                    autocomplete="name"
                     placeholder="e.g. John Doe"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
@@ -188,6 +189,7 @@ include __DIR__ . '/../includes/header.php';
                     name="email"
                     data-testid="input-email"
                     required
+                    autocomplete="email"
                     placeholder="john@example.com"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
@@ -199,6 +201,7 @@ include __DIR__ . '/../includes/header.php';
                     name="username"
                     data-testid="input-username"
                     required
+                    autocomplete="username"
                     placeholder="e.g. STU001"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
@@ -210,6 +213,7 @@ include __DIR__ . '/../includes/header.php';
                     name="password"
                     data-testid="input-password"
                     required
+                    autocomplete="new-password"
                     placeholder="Default password"
                     class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
@@ -243,6 +247,7 @@ include __DIR__ . '/../includes/header.php';
             <input
                 type="text"
                 name="search"
+                id="searchMember"
                 data-testid="search-members"
                 value="<?php echo htmlspecialchars($search); ?>"
                 placeholder="Search members by name, email, or ID..."
@@ -368,5 +373,14 @@ renderPagination($currentPage, $totalItems, $itemsPerPage, [
                 detail.removeAttribute('open');
             }
         });
+    });
+
+    // Real-time search with debounce
+    let searchTimeout;
+    document.getElementById('searchMember')?.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            e.target.closest('form').submit();
+        }, 500);
     });
 </script>
