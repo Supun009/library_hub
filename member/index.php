@@ -25,7 +25,8 @@ $conditions = [];
 $params = [];
 
 if ($search) {
-    $conditions[] = "(b.title LIKE ? OR b.isbn LIKE ?)";
+    $conditions[] = "(b.title LIKE ? OR b.isbn LIKE ? OR EXISTS (SELECT 1 FROM book_authors ba_search JOIN authors a_search ON ba_search.author_id = a_search.author_id WHERE ba_search.book_id = b.book_id AND a_search.name LIKE ?))";
+    $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
 }
@@ -101,11 +102,12 @@ include __DIR__ . '/../includes/header.php';
 </div>
 
 <script>
+let searchTimeout;
 function handleSearchInput(input) {
-    // If search is cleared, submit form to reload all books with current filter
-    if (input.value.trim() === '') {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
         input.form.submit();
-    }
+    }, 500);
 }
 </script>
 
