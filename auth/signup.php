@@ -48,31 +48,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // Register user (always as member)
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                $role_id = 2; // Member role
+                
+                // Dynamically fetch member role ID
+                $stmt = $pdo->prepare("SELECT role_id FROM roles WHERE role_name = 'member'");
+                $stmt->execute();
+                $role = $stmt->fetch();
 
-                try {
-                    $pdo->beginTransaction();
+                if (!$role) {
+                    $error = "System configuration error: 'member' role not found in database.";
+                } else {
+                    $role_id = $role['role_id'];
 
-                    $stmt = $pdo->prepare("INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)");
-                    $stmt->execute([$username, $hashed_password, $role_id]);
-                    $user_id = $pdo->lastInsertId();
+                    try {
+                        $pdo->beginTransaction();
 
-                    // Create member entry
-                    $stmt = $pdo->prepare("INSERT INTO members (user_id, full_name, email) VALUES (?, ?, ?)");
-                    $stmt->execute([$user_id, $fullName, $email]);
+                        $stmt = $pdo->prepare("INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)");
+                        $stmt->execute([$username, $hashed_password, $role_id]);
+                        $user_id = $pdo->lastInsertId();
 
-                    $pdo->commit();
-                    
-                    // Auto login
-                    $_SESSION['user_id'] = $user_id;
-                    $_SESSION['username'] = $username;
-                    $_SESSION['role_id'] = $role_id;
-                    
-                    redirect(url('/'));
+                        // Create member entry
+                        $stmt = $pdo->prepare("INSERT INTO members (user_id, full_name, email) VALUES (?, ?, ?)");
+                        $stmt->execute([$user_id, $fullName, $email]);
 
-                } catch (Exception $e) {
-                    $pdo->rollBack();
-                    $error = "Registration failed: " . $e->getMessage();
+                        $pdo->commit();
+                        
+                        // Auto login
+                        $_SESSION['user_id'] = $user_id;
+                        $_SESSION['username'] = $username;
+                        $_SESSION['role_id'] = $role_id;
+                        
+                        redirect(url('/'));
+
+                    } catch (Exception $e) {
+                        $pdo->rollBack();
+                        $error = "Registration failed: " . $e->getMessage();
+                    }
                 }
             }
         }
