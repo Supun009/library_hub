@@ -121,7 +121,6 @@ class MemberManagementPage {
       }
     }
 
-    // Fallback to row counting (visible rows only)
     const rows = await this.membersTable.locator("tr").count();
     // Subtract 1 if there's a "No members found" row
     const noMembersRow = await this.membersTable

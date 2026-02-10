@@ -113,13 +113,10 @@ class ManageBooksPage {
 
   async getErrorMessage() {
     const errorAlert = this.page.locator(".text-red-700");
-    // Wait for the error to appear (default timeout if not specified, e.g. 5s)
-    try {
-      await errorAlert.waitFor({ state: "visible", timeout: 5000 });
+    if (await errorAlert.isVisible()) {
       return await errorAlert.textContent();
-    } catch (e) {
-      return null;
     }
+    return null;
   }
 }
 

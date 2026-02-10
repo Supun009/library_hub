@@ -10,7 +10,7 @@ const authFile = path.join(__dirname, "../.auth/admin.json");
  */
 test("authenticate as admin", async ({ page, baseURL }) => {
   // Navigate to login page
-  await page.goto("http://localhost/lib_system/library_system/login");
+  await page.goto("http://localhost/library_hub/library_hub/login");
 
   // Fill in admin credentials
   // NOTE: Update these credentials to match your actual admin account

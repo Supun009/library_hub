@@ -1,10 +1,46 @@
 const { test, expect } = require("@playwright/test");
 const { ManageBooksPage } = require("./helpers/page-objects/manage-books.page");
+const {
+  ManageCategoriesPage,
+} = require("./helpers/page-objects/manage-categories.page");
+const {
+  ManageAuthorsPage,
+} = require("./helpers/page-objects/manage-authors.page");
 const { generateBookData } = require("./helpers/test-data");
 
 test.describe("Book Management - Add Book", () => {
   let booksPage;
   let testBookData;
+
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // Ensure at least one category exists
+    const categoriesPage = new ManageCategoriesPage(page);
+    await categoriesPage.goto();
+    await categoriesPage.addCategory("General Books Category");
+    // Wait for result
+    await Promise.race([
+      categoriesPage.getSuccessMessage(),
+      categoriesPage.getErrorMessage(),
+      page.waitForTimeout(2000),
+    ]);
+
+    // Ensure at least one author exists
+    const authorsPage = new ManageAuthorsPage(page);
+    await authorsPage.goto();
+    await authorsPage.addAuthor("General Author");
+    // Wait for result
+    await Promise.race([
+      authorsPage.getSuccessMessage(),
+      authorsPage.getErrorMessage(),
+      page.waitForTimeout(2000),
+    ]);
+
+    await page.close();
+    await context.close();
+  });
 
   test.beforeEach(async ({ page }) => {
     booksPage = new ManageBooksPage(page);
