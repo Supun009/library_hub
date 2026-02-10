@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM members WHERE email = ?");
             $stmt->execute([$email]);
             if ($stmt->fetchColumn() > 0) {
-                 throw new Exception("Email already registered.");
+                 throw new Exception("Username or Email already exists.");
             }
 
             // 1. Create User

@@ -24,7 +24,7 @@ class ManageBooksPage {
 
   async gotoAddBook() {
     await this.page.goto(
-      "http://localhost/library_hub/library_system/admin/books/add",
+      "http://localhost/lib_system/library_system/admin/books/add",
     );
   }
 
@@ -113,10 +113,13 @@ class ManageBooksPage {
 
   async getErrorMessage() {
     const errorAlert = this.page.locator(".text-red-700");
-    if (await errorAlert.isVisible()) {
+    // Wait for the error to appear (default timeout if not specified, e.g. 5s)
+    try {
+      await errorAlert.waitFor({ state: "visible", timeout: 5000 });
       return await errorAlert.textContent();
+    } catch (e) {
+      return null;
     }
-    return null;
   }
 }
 

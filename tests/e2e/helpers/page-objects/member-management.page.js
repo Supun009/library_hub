@@ -111,6 +111,17 @@ class MemberManagementPage {
    * @returns {Promise<number>} Number of member rows
    */
   async getMemberCount() {
+    // Try to get total count from the stats text first (e.g., "Total: 12 member(s)")
+    const totalStats = this.page.locator(".table-header p");
+    if ((await totalStats.count()) > 0) {
+      const text = await totalStats.textContent();
+      const match = text.match(/Total:\s*(\d+)/);
+      if (match) {
+        return parseInt(match[1], 10);
+      }
+    }
+
+    // Fallback to row counting (visible rows only)
     const rows = await this.membersTable.locator("tr").count();
     // Subtract 1 if there's a "No members found" row
     const noMembersRow = await this.membersTable
