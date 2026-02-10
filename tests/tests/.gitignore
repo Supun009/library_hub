@@ -1,0 +1,19 @@
+# Ignore Playwright artifacts
+node_modules/
+playwright-report/
+test-results/
+.auth/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore logs
+*.log
+npm-debug.log*

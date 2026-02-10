@@ -24,7 +24,7 @@ class ManageBooksPage {
 
   async gotoAddBook() {
     await this.page.goto(
-      "http://localhost/library_hub/library_system/admin/books/add",
+      "http://localhost/lib_system/library_system/admin/books/add",
     );
   }
 
