@@ -52,7 +52,7 @@ if ($hasSearched) {
         $params[] = "%" . $filters['isbn'] . "%";
     }
 
-    if ($filters['category'] !== 'All') {
+    if ($filters['category'] !== 'All' && !empty($filters['category'])) {
         $conditions[] = "c.category_name = ?";
         $params[] = $filters['category'];
     }
@@ -97,11 +97,6 @@ if ($hasSearched) {
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<script>
-    // Transform simple array to object array to match JS expectation
-    window.categoriesData = <?php echo json_encode(array_map(function($c) { return ['category_name' => $c]; }, $categories)); ?>;
-</script>
-<script src="<?php echo asset('js/book-catalog-search.js'); ?>?v=<?php echo time(); ?>"></script>
 
 <div class="mb-6">
     <h1 class="page-heading">Advanced Search</h1>
